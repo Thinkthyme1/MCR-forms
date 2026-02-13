@@ -92,8 +92,12 @@ button {
 button.danger { background: var(--danger); border-color: #fecaca; }
 button.danger:hover { background: var(--danger-dark); }
 
-.hold-wrap { position: relative; display: inline-flex; flex-direction: column; gap: 0.2rem; }
+.hold-wrap { position: relative; display: inline-flex; align-items: stretch; }
 .hold-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6px;
   height: 3px;
   width: 100%;
   background: linear-gradient(90deg, #22c55e var(--hold, 0%), #334155 var(--hold, 0%));
