@@ -199,7 +199,6 @@ input, textarea, select {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  border-bottom: 1px solid #000;
   padding-bottom: 0.65rem;
 }
 .roi-route-col {
@@ -287,6 +286,45 @@ input, textarea, select {
   border: none;
   border-top: 1px solid #000;
   margin: 0.15rem 0 0.25rem;
+}
+.roi-terms-block {
+  display: grid;
+  gap: 0.55rem;
+}
+.roi-term-item {
+  margin: 0;
+  line-height: 1.35;
+}
+.roi-term-item-text {
+  margin: 0;
+  line-height: 1.35;
+}
+.roi-duration-options {
+  margin-top: 0.3rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.roi-duration-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+.roi-duration-option .radio-filled {
+  margin-top: 0.16rem;
+}
+.roi-duration-or {
+  font-weight: 700;
+}
+.roi-sign-row {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  border-top: 1px solid #000;
+  padding-top: 0.5rem;
+}
+.roi-sign-row p {
+  margin: 0;
 }
 .roi-initials-block {
   display: grid;
@@ -448,6 +486,10 @@ input, textarea, select {
     padding-top: 0.6rem;
   }
   .roi-initial-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+  .roi-sign-row {
     grid-template-columns: 1fr;
     gap: 0.35rem;
   }

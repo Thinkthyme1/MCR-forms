@@ -29,6 +29,7 @@ export function createEmptyRoi(id) {
     init2b: "",
     init3a: "",
     init3b: "",
+    durationChoice: "servicePeriod",
     notes: "",
     summary: "",
     signature: "",

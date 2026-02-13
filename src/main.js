@@ -3,8 +3,7 @@ import {
   CRITICAL_ASSETS,
   HOLD_CONFIRM_MS,
   INACTIVITY_LOCK_MS,
-  NOTICE_SECTIONS,
-  ROI_LEGAL_PLACEHOLDER
+  NOTICE_SECTIONS
 } from "./constants.js";
 import {
   deleteSalt,
@@ -43,7 +42,6 @@ const ui = {
   deleteProgress: $("deleteProgress"),
   createPdfBtn: $("createPdfBtn"),
   pdfActionWrap: $("pdfActionWrap"),
-  roiLegalText: $("roiLegalText"),
   noticeLegal1: $("noticeLegal1"),
   noticeLegal2: $("noticeLegal2"),
   noticeLegal3: $("noticeLegal3"),
@@ -91,10 +89,11 @@ const fields = {
   roiInit2B: $("roiInit2B"),
   roiInit3A: $("roiInit3A"),
   roiInit3B: $("roiInit3B"),
+  roiDurationOneYear: $("roiDurationOneYear"),
+  roiDurationServicePeriod: $("roiDurationServicePeriod"),
   roiNotes: $("roiNotes"),
-  roiSummary: $("roiSummary"),
-  roiDate: $("roiDate"),
-  roiTime: $("roiTime"),
+  roiPrintName: $("roiPrintName"),
+  roiTodayDate: $("roiTodayDate"),
   noticeClientName: $("noticeClientName"),
   noticeClientDob: $("noticeClientDob"),
   noticeStaffName: $("noticeStaffName"),
@@ -169,10 +168,11 @@ function renderState() {
   fields.roiInit2B.value = roi.init2b || "";
   fields.roiInit3A.value = roi.init3a || "";
   fields.roiInit3B.value = roi.init3b || "";
+  fields.roiDurationOneYear.checked = roi.durationChoice === "oneYear";
+  fields.roiDurationServicePeriod.checked = roi.durationChoice !== "oneYear";
   fields.roiNotes.value = roi.notes || "";
-  fields.roiSummary.value = roi.summary || "";
-  fields.roiDate.value = roi.date || "";
-  fields.roiTime.value = roi.time || "";
+  fields.roiPrintName.textContent = clientFullName(state);
+  fields.roiTodayDate.textContent = roi.date || new Date().toISOString().slice(0, 10);
 
   fields.noticeSummary1.value = state.notice.summary1;
   fields.noticeSummary2.value = state.notice.summary2;
@@ -476,7 +476,7 @@ async function savePdfBlob(bytes, filename) {
 async function createPdfForActiveView() {
   if (state.currentView === "roi") {
     const roi = getActiveRoi(state);
-    const pdfBytes = await createRoiPdf(state, roi, ROI_LEGAL_PLACEHOLDER);
+    const pdfBytes = await createRoiPdf(state, roi);
     await savePdfBlob(pdfBytes, buildFileName("ROI", state.general));
     return;
   }
@@ -584,20 +584,20 @@ function bindFieldInputs() {
     e.target.value = e.target.value.toUpperCase();
     markChanged();
   });
+  fields.roiDurationOneYear.addEventListener("change", (e) => {
+    if (e.target.checked) {
+      upsertActiveRoi(state, { durationChoice: "oneYear" });
+      markChanged();
+    }
+  });
+  fields.roiDurationServicePeriod.addEventListener("change", (e) => {
+    if (e.target.checked) {
+      upsertActiveRoi(state, { durationChoice: "servicePeriod" });
+      markChanged();
+    }
+  });
   fields.roiNotes.addEventListener("input", (e) => {
     upsertActiveRoi(state, { notes: e.target.value });
-    markChanged();
-  });
-  fields.roiSummary.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { summary: e.target.value });
-    markChanged();
-  });
-  fields.roiDate.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { date: e.target.value });
-    markChanged();
-  });
-  fields.roiTime.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { time: e.target.value });
     markChanged();
   });
 
@@ -760,7 +760,6 @@ async function setupDirectoryPicker() {
 }
 
 async function bootstrap() {
-  ui.roiLegalText.textContent = ROI_LEGAL_PLACEHOLDER;
   ui.noticeLegal1.textContent = NOTICE_SECTIONS[0].text;
   ui.noticeLegal2.textContent = NOTICE_SECTIONS[1].text;
   ui.noticeLegal3.textContent = NOTICE_SECTIONS[2].text;

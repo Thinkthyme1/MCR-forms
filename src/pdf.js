@@ -181,7 +181,7 @@ export function buildFileName(formType, general) {
   return `${mm}.${dd}.${yy} ${a}${b} ${formType}.pdf`;
 }
 
-export async function createRoiPdf(state, roi, legalText) {
+export async function createRoiPdf(state, roi) {
   const subtitleLines = [
     `Client: ${state.general.firstName} ${state.general.lastName}`.trim(),
     `DOB: ${state.general.dob || ""}`,
@@ -190,8 +190,8 @@ export async function createRoiPdf(state, roi, legalText) {
     `Agency: ${roi.organization || ""}`
   ];
   const bodySections = [
-    { heading: "Legal Text", text: legalText },
-    { heading: "Summary", text: roi.summary || "" },
+    { heading: "Address", text: roi.address || "" },
+    { heading: "Phone/Fax", text: `Phone: ${roi.phone || ""} Fax: ${roi.fax || ""}` },
     { heading: "Notes", text: roi.notes || "" }
   ];
   return buildPdf({

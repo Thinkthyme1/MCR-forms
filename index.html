@@ -173,19 +173,58 @@
             <hr class="roi-route-hr" />
 
             <label>Purpose of Disclosure <input id="roiPurpose" type="text" /></label>
+
+            <div class="roi-terms-block">
+              <p class="roi-term-item">
+                1. I understand that the information disclosed pursuant to this Authorization may be subject to re-disclosure by the recipient and
+                no longer protected by federal privacy regulations or other applicable state or federal laws (except as set forth in paragraph 2
+                below).
+              </p>
+              <p class="roi-term-item">
+                2. I understand that, pursuant to 42 C.F.R. Part 2, alcohol and drug abuse records that I authorize to be disclosed pursuant to
+                this document may not be further re-disclosed without my written consent, except by a court order that complies with the
+                preconditions set forth at 42 C.F.R. 2.61 et seq., or the other limited circumstances specifically permitted by 42 C.F.R. Part 2.
+                Any individual that makes such a disclosure in violation of these provisions may be reported to the United States Attorney and be
+                subject to criminal penalties.
+              </p>
+              <p class="roi-term-item">
+                3. I understand that the Department of Behavioral Health and Developmental Disabilities will not condition my treatment, payment,
+                or eligibility for any applicable benefits on whether I provide authorization for the requested release of information.
+              </p>
+              <div class="roi-term-item">
+                <p class="roi-term-item-text">
+                  4. I intend this document to be a valid authorization conforming to all requirements of the Privacy Rule and State law, and
+                  understand that my authorization will remain in effect for: (PLEASE CHECK ONE)
+                </p>
+                <div class="roi-duration-options">
+                  <label class="roi-duration-option">
+                    <input id="roiDurationOneYear" class="route-toggle" type="radio" name="roiDuration" />
+                    <span class="radio-filled" aria-hidden="true"></span>
+                    <span>one (1) year</span>
+                  </label>
+                  <span class="roi-duration-or">OR</span>
+                  <label class="roi-duration-option">
+                    <input id="roiDurationServicePeriod" class="route-toggle" type="radio" name="roiDuration" checked />
+                    <span class="radio-filled" aria-hidden="true"></span>
+                    <span>the period necessary to complete all transactions on matters related to services provided to me.</span>
+                  </label>
+                </div>
+              </div>
+              <p class="roi-term-item">
+                I understand that unless otherwise limited by state or federal regulation, and except to the extent that action has been taken
+                based upon it, I may revoke this authorization at any time as shown in the space below.
+              </p>
+            </div>
+
             <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
-            <label>Notes <textarea id="roiNotes" rows="4"></textarea></label>
-            <h3>ROI Legal Language</h3>
-            <div class="legal-text" id="roiLegalText"></div>
-            <label>Summary (plain-language explanation) <textarea id="roiSummary" rows="3"></textarea></label>
-            <h3>Client Signature</h3>
             <canvas id="roiSignature" class="signature-pad" width="640" height="180"></canvas>
             <div class="signature-actions">
               <button id="clearRoiSigBtn" type="button">Clear Signature</button>
             </div>
-            <div class="date-time-row">
-              <label>Date <input id="roiDate" type="date" /></label>
-              <label>Time <input id="roiTime" type="time" /></label>
+            <div class="roi-sign-row">
+              <p>Signature of Individual</p>
+              <p>Print Name: <span id="roiPrintName"></span></p>
+              <p>Date: <span id="roiTodayDate"></span></p>
             </div>
           </form>
         </section>
