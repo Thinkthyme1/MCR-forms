@@ -74,7 +74,7 @@ export async function clearStore(store) {
 }
 
 export async function getStaffInfo() {
-  return (await get(STORES.staff, "profile")) || { firstName: "", lastName: "" };
+  return (await get(STORES.staff, "profile")) || { firstName: "", lastName: "", role: "", signature: "" };
 }
 
 export async function setStaffInfo(staff) {

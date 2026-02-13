@@ -48,6 +48,8 @@ const ui = {
   roiSelect: $("roiSelect"),
   addRoiBtn: $("addRoiBtn"),
   clearRoiSigBtn: $("clearRoiSigBtn"),
+  clearRoiParentSigBtn: $("clearRoiParentSigBtn"),
+  clearStaffSigBtn: $("clearStaffSigBtn"),
   clearNoticeSigBtn: $("clearNoticeSigBtn"),
   lockOverlay: $("lockOverlay"),
   continueBtn: $("continueBtn"),
@@ -70,6 +72,7 @@ const fields = {
   generalDob: $("generalDob"),
   staffFirstName: $("staffFirstName"),
   staffLastName: $("staffLastName"),
+  staffRole: $("staffRole"),
   roiClientName: $("roiClientName"),
   roiClientDob: $("roiClientDob"),
   roiStaffName: $("roiStaffName"),
@@ -84,15 +87,13 @@ const fields = {
   roiRightTo: $("roiRightTo"),
   roiRightFrom: $("roiRightFrom"),
   roiInit1A: $("roiInit1A"),
-  roiInit1B: $("roiInit1B"),
   roiInit2A: $("roiInit2A"),
-  roiInit2B: $("roiInit2B"),
-  roiInit3A: $("roiInit3A"),
-  roiInit3B: $("roiInit3B"),
   roiDurationOneYear: $("roiDurationOneYear"),
   roiDurationServicePeriod: $("roiDurationServicePeriod"),
   roiPrintName: $("roiPrintName"),
   roiTodayDate: $("roiTodayDate"),
+  roiStaffSignaturePreview: $("roiStaffSignaturePreview"),
+  roiStaffSignatureMissing: $("roiStaffSignatureMissing"),
   noticeClientName: $("noticeClientName"),
   noticeClientDob: $("noticeClientDob"),
   noticeStaffName: $("noticeStaffName"),
@@ -104,6 +105,8 @@ const fields = {
 };
 
 let roiSigPad;
+let roiParentSigPad;
+let staffSigPad;
 let noticeSigPad;
 
 function clone(obj) {
@@ -149,6 +152,7 @@ function renderState() {
   fields.generalDob.value = state.general.dob;
   fields.staffFirstName.value = state.staff.firstName;
   fields.staffLastName.value = state.staff.lastName;
+  fields.staffRole.value = state.staff.role || "";
 
   const roi = getActiveRoi(state);
   fields.roiPurpose.value = roi.purpose || "";
@@ -162,15 +166,20 @@ function renderState() {
   fields.roiRightTo.checked = roi.rightTo !== false;
   fields.roiRightFrom.checked = roi.rightFrom !== false;
   fields.roiInit1A.value = roi.init1a || "";
-  fields.roiInit1B.value = roi.init1b || "";
   fields.roiInit2A.value = roi.init2a || "";
-  fields.roiInit2B.value = roi.init2b || "";
-  fields.roiInit3A.value = roi.init3a || "";
-  fields.roiInit3B.value = roi.init3b || "";
   fields.roiDurationOneYear.checked = roi.durationChoice === "oneYear";
   fields.roiDurationServicePeriod.checked = roi.durationChoice !== "oneYear";
   fields.roiPrintName.textContent = clientFullName(state);
   fields.roiTodayDate.textContent = roi.date || new Date().toISOString().slice(0, 10);
+  if (state.staff.signature) {
+    fields.roiStaffSignaturePreview.src = state.staff.signature;
+    fields.roiStaffSignaturePreview.classList.remove("hidden");
+    fields.roiStaffSignatureMissing.classList.add("hidden");
+  } else {
+    fields.roiStaffSignaturePreview.removeAttribute("src");
+    fields.roiStaffSignaturePreview.classList.add("hidden");
+    fields.roiStaffSignatureMissing.classList.remove("hidden");
+  }
 
   fields.noticeSummary1.value = state.notice.summary1;
   fields.noticeSummary2.value = state.notice.summary2;
@@ -182,8 +191,10 @@ function renderState() {
   bindLiveText();
   renderView();
 
-  if (roiSigPad && noticeSigPad) {
+  if (roiSigPad && roiParentSigPad && staffSigPad && noticeSigPad) {
     roiSigPad.fromDataUrl(roi.signature);
+    roiParentSigPad.fromDataUrl(roi.parentSignature || "");
+    staffSigPad.fromDataUrl(state.staff.signature || "");
     noticeSigPad.fromDataUrl(state.notice.signature);
   }
 }
@@ -513,6 +524,10 @@ function bindFieldInputs() {
     bindLiveText();
     await saveStaffOnly();
   });
+  fields.staffRole.addEventListener("input", async (e) => {
+    state.staff.role = e.target.value;
+    await saveStaffOnly();
+  });
 
   fields.roiPurpose.addEventListener("input", (e) => {
     upsertActiveRoi(state, { purpose: e.target.value });
@@ -559,28 +574,8 @@ function bindFieldInputs() {
     e.target.value = e.target.value.toUpperCase();
     markChanged();
   });
-  fields.roiInit1B.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { init1b: e.target.value.toUpperCase() });
-    e.target.value = e.target.value.toUpperCase();
-    markChanged();
-  });
   fields.roiInit2A.addEventListener("input", (e) => {
     upsertActiveRoi(state, { init2a: e.target.value.toUpperCase() });
-    e.target.value = e.target.value.toUpperCase();
-    markChanged();
-  });
-  fields.roiInit2B.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { init2b: e.target.value.toUpperCase() });
-    e.target.value = e.target.value.toUpperCase();
-    markChanged();
-  });
-  fields.roiInit3A.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { init3a: e.target.value.toUpperCase() });
-    e.target.value = e.target.value.toUpperCase();
-    markChanged();
-  });
-  fields.roiInit3B.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { init3b: e.target.value.toUpperCase() });
     e.target.value = e.target.value.toUpperCase();
     markChanged();
   });
@@ -660,6 +655,16 @@ function bindSignatures() {
     upsertActiveRoi(state, { signature: value });
     markChanged();
   });
+  roiParentSigPad = attachSignaturePad($("roiParentSignature"), () => {
+    const value = roiParentSigPad.isBlank() ? "" : roiParentSigPad.toDataUrl();
+    upsertActiveRoi(state, { parentSignature: value });
+    markChanged();
+  });
+  staffSigPad = attachSignaturePad($("staffSignature"), async () => {
+    state.staff.signature = staffSigPad.isBlank() ? "" : staffSigPad.toDataUrl();
+    renderState();
+    await saveStaffOnly();
+  });
 
   noticeSigPad = attachSignaturePad($("noticeSignature"), () => {
     state.notice.signature = noticeSigPad.isBlank() ? "" : noticeSigPad.toDataUrl();
@@ -670,6 +675,17 @@ function bindSignatures() {
     roiSigPad.clear();
     upsertActiveRoi(state, { signature: "" });
     markChanged();
+  });
+  ui.clearRoiParentSigBtn.addEventListener("click", () => {
+    roiParentSigPad.clear();
+    upsertActiveRoi(state, { parentSignature: "" });
+    markChanged();
+  });
+  ui.clearStaffSigBtn.addEventListener("click", async () => {
+    staffSigPad.clear();
+    state.staff.signature = "";
+    renderState();
+    await saveStaffOnly();
   });
 
   ui.clearNoticeSigBtn.addEventListener("click", () => {

@@ -62,6 +62,12 @@
           <h2>Staff Info</h2>
           <label>First Name <input id="staffFirstName" type="text" autocomplete="off" /></label>
           <label>Last Name <input id="staffLastName" type="text" autocomplete="off" /></label>
+          <label>Title/Relationship <input id="staffRole" type="text" autocomplete="off" /></label>
+          <h3>Staff Signature (Persistent)</h3>
+          <canvas id="staffSignature" class="signature-pad" width="640" height="160"></canvas>
+          <div class="signature-actions">
+            <button id="clearStaffSigBtn" type="button">Clear Staff Signature</button>
+          </div>
           <div id="dirPickerWrap" class="hidden">
             <button id="pickFolderBtn" type="button">Choose Default Save Folder</button>
             <p id="folderStatus" class="muted"></p>
@@ -137,32 +143,20 @@
 
             <section class="roi-initials-block" aria-label="ROI initials authorization section">
               <p class="roi-initials-title">Initial the appropriate space below:</p>
+              <p class="roi-initial-text">the following type(s) of information from my records (and any specific portion thereof):</p>
 
               <div class="roi-initial-row">
                 <div class="roi-initial-boxes">
                   <input id="roiInit1A" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
-                  <input id="roiInit1B" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
                 </div>
                 <p class="roi-initial-text">
-                  I authorize the following information from my records (and any specific portion thereof).
+                  I authorize the disclosure of alcohol or drug abuse information, if any.
                 </p>
               </div>
 
               <div class="roi-initial-row">
                 <div class="roi-initial-boxes">
                   <input id="roiInit2A" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
-                  <input id="roiInit2B" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
-                </div>
-                <p class="roi-initial-text">
-                  I authorize the disclosure of alcohol or drug abuse information, if any. (Please see paragraph 2 below.) If I am a minor, my
-                  parent/guardian/court-ordered custodian and I BOTH must initial here in order for this information to be released.
-                </p>
-              </div>
-
-              <div class="roi-initial-row">
-                <div class="roi-initial-boxes">
-                  <input id="roiInit3A" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
-                  <input id="roiInit3B" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
                 </div>
                 <p class="roi-initial-text">
                   I authorize the disclosure of information, if any, concerning testing for HIV (human immunodeficiency virus) and/or treatment
@@ -176,53 +170,58 @@
 
             <div class="roi-terms-block">
               <p class="roi-term-item">
-                1. I understand that the information disclosed pursuant to this Authorization may be subject to re-disclosure by the recipient and
-                no longer protected by federal privacy regulations or other applicable state or federal laws (except as set forth in paragraph 2
-                below).
+                I understand that the federal Privacy Rule ("HIPAA") does not protect the privacy of information if re-disclosed, and therefore
+                request that all information obtained from this person or agency be held strictly confidential and not be further released by the
+                recipient.
               </p>
               <p class="roi-term-item">
-                2. I understand that, pursuant to 42 C.F.R. Part 2, alcohol and drug abuse records that I authorize to be disclosed pursuant to
-                this document may not be further re-disclosed without my written consent, except by a court order that complies with the
-                preconditions set forth at 42 C.F.R. 2.61 et seq., or the other limited circumstances specifically permitted by 42 C.F.R. Part 2.
-                Any individual that makes such a disclosure in violation of these provisions may be reported to the United States Attorney and be
-                subject to criminal penalties.
+                I further understand that the Department or my healthcare provider will not condition my treatment, payment, or eligibility for
+                any applicable benefits on whether I provide authorization for the requested release of information.
               </p>
               <p class="roi-term-item">
-                3. I understand that the Department of Behavioral Health and Developmental Disabilities will not condition my treatment, payment,
-                or eligibility for any applicable benefits on whether I provide authorization for the requested release of information.
+                I intend this document to be a valid authorization conforming to all requirements of the Privacy Rule and state law, and
+                understand that my authorization will remain in effect for: (PLEASE CHECK ONE)
               </p>
-              <div class="roi-term-item">
-                <p class="roi-term-item-text">
-                  4. I intend this document to be a valid authorization conforming to all requirements of the Privacy Rule and State law, and
-                  understand that my authorization will remain in effect for: (PLEASE CHECK ONE)
-                </p>
-                <div class="roi-duration-options">
-                  <label class="roi-duration-option">
-                    <input id="roiDurationOneYear" class="route-toggle" type="radio" name="roiDuration" />
-                    <span class="radio-filled" aria-hidden="true"></span>
-                    <span>one (1) year</span>
-                  </label>
-                  <span class="roi-duration-or">OR</span>
-                  <label class="roi-duration-option">
-                    <input id="roiDurationServicePeriod" class="route-toggle" type="radio" name="roiDuration" checked />
-                    <span class="radio-filled" aria-hidden="true"></span>
-                    <span>the period necessary to complete all transactions on matters related to services provided to me.</span>
-                  </label>
-                </div>
+              <div class="roi-duration-options">
+                <label class="roi-duration-option">
+                  <input id="roiDurationOneYear" class="route-toggle" type="radio" name="roiDuration" />
+                  <span class="radio-filled" aria-hidden="true"></span>
+                  <span>one (1) year.</span>
+                </label>
+                <label class="roi-duration-option">
+                  <input id="roiDurationServicePeriod" class="route-toggle" type="radio" name="roiDuration" checked />
+                  <span class="radio-filled" aria-hidden="true"></span>
+                  <span>the period necessary to complete all transactions on matters related to services provided to me.</span>
+                </label>
               </div>
               <p class="roi-term-item">
                 I understand that unless otherwise limited by state or federal regulation, and except to the extent that action has been taken
-                based upon it, I may revoke this authorization at any time as shown in the space below.
+                based upon it, I may withdraw this authorization at any time by sending written notice of my withdrawal of this authorization to
+                the staff of the healthcare provider who is providing services to me, OR to the Department's Privacy Officer at 2 Peachtree St.
+                NW, Atlanta, GA 30303-3142.
               </p>
             </div>
 
             <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
+            <h3>Signature of Individual/Consumer/Patient/Applicant</h3>
             <canvas id="roiSignature" class="signature-pad" width="640" height="180"></canvas>
             <div class="signature-actions">
               <button id="clearRoiSigBtn" type="button">Clear Signature</button>
             </div>
+            <h3>Signature of Parent or Other Legally Authorized Representative (where applicable)</h3>
+            <canvas id="roiParentSignature" class="signature-pad" width="640" height="180"></canvas>
+            <div class="signature-actions">
+              <button id="clearRoiParentSigBtn" type="button">Clear Parent/Representative Signature</button>
+            </div>
+            <h3>Signature of Witness (Staff)</h3>
+            <div class="roi-staff-signature-wrap">
+              <img id="roiStaffSignaturePreview" class="signature-preview hidden" alt="Staff signature preview" />
+              <p id="roiStaffSignatureMissing" class="muted hidden">
+                Add a signature in Staff Info to apply a persistent staff witness signature.
+              </p>
+            </div>
             <div class="roi-sign-row">
-              <p>Signature of Individual</p>
+              <p>Signature of Individual/Consumer/Patient/Applicant</p>
               <p>Print Name: <span id="roiPrintName"></span></p>
               <p>Date: <span id="roiTodayDate"></span></p>
             </div>

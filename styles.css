@@ -295,10 +295,6 @@ input, textarea, select {
   margin: 0;
   line-height: 1.35;
 }
-.roi-term-item-text {
-  margin: 0;
-  line-height: 1.35;
-}
 .roi-duration-options {
   margin-top: 0.3rem;
   display: grid;
@@ -313,9 +309,6 @@ input, textarea, select {
 .roi-duration-option .radio-filled {
   margin-top: 0.16rem;
 }
-.roi-duration-or {
-  font-weight: 700;
-}
 .roi-sign-row {
   display: grid;
   gap: 0.6rem;
@@ -325,6 +318,22 @@ input, textarea, select {
 }
 .roi-sign-row p {
   margin: 0;
+}
+.roi-staff-signature-wrap {
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  padding: 0.45rem;
+  background: #fff;
+}
+.signature-preview {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  max-height: 140px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: #fff;
 }
 .roi-initials-block {
   display: grid;

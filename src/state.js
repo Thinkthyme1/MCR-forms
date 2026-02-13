@@ -13,7 +13,6 @@ export function createEmptyRoi(id) {
   return {
     id,
     purpose: "Continuity of care",
-    recipient: "",
     organization: "",
     careOf: "",
     address: "",
@@ -24,15 +23,10 @@ export function createEmptyRoi(id) {
     rightTo: true,
     rightFrom: true,
     init1a: "",
-    init1b: "",
     init2a: "",
-    init2b: "",
-    init3a: "",
-    init3b: "",
     durationChoice: "servicePeriod",
-    notes: "",
-    summary: "",
     signature: "",
+    parentSignature: "",
     date: nowDate(),
     time: nowTime()
   };
@@ -48,7 +42,9 @@ export function createInitialState() {
     },
     staff: {
       firstName: "",
-      lastName: ""
+      lastName: "",
+      role: "",
+      signature: ""
     },
     roi: {
       activeId: "roi-1",
@@ -80,14 +76,9 @@ export function hasPhi(state) {
           r.phone ||
           r.fax ||
           r.init1a ||
-          r.init1b ||
           r.init2a ||
-          r.init2b ||
-          r.init3a ||
-          r.init3b ||
-          r.notes ||
-          r.summary ||
-          r.signature
+          r.signature ||
+          r.parentSignature
       ) ||
       state.notice.summary1 ||
       state.notice.summary2 ||
