@@ -34,6 +34,7 @@ export function attachSignaturePad(canvas, onChange) {
   };
 
   const end = () => {
+    if (!drawing) return;
     drawing = false;
     onChange?.();
   };
