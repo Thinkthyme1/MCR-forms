@@ -217,6 +217,10 @@ input, textarea, select {
   padding: 0.45rem 0.65rem;
 }
 
+#pickFolderBtn {
+  border-radius: 0.4rem;
+}
+
 .muted { color: var(--muted); font-size: 0.9rem; }
 .error { color: #b91c1c; min-height: 1.2rem; }
 
