@@ -12,7 +12,7 @@ function nowTime() {
 export function createEmptyRoi(id) {
   return {
     id,
-    purpose: "",
+    purpose: "Continuity of care",
     recipient: "",
     notes: "",
     summary: "",
