@@ -24,20 +24,24 @@ button, input, textarea, select { font: inherit; }
   background: var(--panel);
   color: #fff;
   border-bottom: 1px solid #000;
+  padding: 0.45rem 0.75rem 0.75rem;
+  min-height: 2.75rem;
 }
 
 .chevron {
-  position: absolute;
-  right: 0.5rem;
-  top: 0.25rem;
-  border: none;
-  background: transparent;
+  display: inline-block;
+  margin-left: auto;
+  border: 1px solid #cbd5e1;
+  background: #111827;
   color: #fff;
-  font-size: 1.2rem;
-  padding: 0.4rem;
+  border-radius: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.4rem 0.6rem;
 }
+.chevron:hover { background: #1f2937; }
 
-.panel-content { padding: 2rem 0.75rem 0.75rem; display: grid; gap: 0.75rem; }
+.panel-content { padding: 0.65rem 0 0; display: grid; gap: 0.75rem; }
 .top-panel.collapsed .panel-content { display: none; }
 
 .button-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }

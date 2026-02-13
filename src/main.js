@@ -527,10 +527,17 @@ function bindFieldInputs() {
 }
 
 function bindNav() {
-  ui.panelChevron.addEventListener("click", () => {
-    const collapsed = ui.topPanel.classList.toggle("collapsed");
-    ui.panelChevron.textContent = collapsed ? "▼" : "▲";
+  const syncPanelToggleLabel = () => {
+    const collapsed = ui.topPanel.classList.contains("collapsed");
+    ui.panelChevron.textContent = collapsed ? "Show Panel ▼" : "Hide Panel ▲";
     ui.panelChevron.setAttribute("aria-expanded", String(!collapsed));
+  };
+
+  syncPanelToggleLabel();
+
+  ui.panelChevron.addEventListener("click", () => {
+    ui.topPanel.classList.toggle("collapsed");
+    syncPanelToggleLabel();
   });
 
   document.querySelectorAll("#formNav button[data-view], #infoNav button[data-view]").forEach((btn) => {
