@@ -91,7 +91,6 @@ const fields = {
   roiInit3B: $("roiInit3B"),
   roiDurationOneYear: $("roiDurationOneYear"),
   roiDurationServicePeriod: $("roiDurationServicePeriod"),
-  roiNotes: $("roiNotes"),
   roiPrintName: $("roiPrintName"),
   roiTodayDate: $("roiTodayDate"),
   noticeClientName: $("noticeClientName"),
@@ -170,7 +169,6 @@ function renderState() {
   fields.roiInit3B.value = roi.init3b || "";
   fields.roiDurationOneYear.checked = roi.durationChoice === "oneYear";
   fields.roiDurationServicePeriod.checked = roi.durationChoice !== "oneYear";
-  fields.roiNotes.value = roi.notes || "";
   fields.roiPrintName.textContent = clientFullName(state);
   fields.roiTodayDate.textContent = roi.date || new Date().toISOString().slice(0, 10);
 
@@ -238,9 +236,8 @@ function resolveAssetUrl(path) {
   return new URL(path, window.location.href).toString();
 }
 
-async function mirrorAsset(path) {
-  const response = await fetch(resolveAssetUrl(path), { cache: "reload" });
-  if (!response.ok) throw new Error("asset fetch failed");
+async function mirrorAsset(path, response) {
+  if (!response) return;
   const bytes = new Uint8Array(await response.arrayBuffer());
   await setAssetMirror(path, bytes);
 }
@@ -250,18 +247,21 @@ async function verifyCriticalAssets() {
   let missingAny = false;
   for (const asset of CRITICAL_ASSETS) {
     const assetUrl = resolveAssetUrl(asset);
-    const fromCache = await cache.match(assetUrl);
+    let fromCache = await cache.match(assetUrl);
     const inMirror = await hasAssetMirror(asset);
-    if (!fromCache || !inMirror) {
+    if (!fromCache) {
       missingAny = true;
       if (navigator.onLine) {
         try {
           await cache.add(assetUrl);
+          fromCache = await cache.match(assetUrl);
         } catch {
           // Keep warning behavior below if recache is not possible.
         }
-        await mirrorAsset(asset).catch(() => {});
       }
+    }
+    if (fromCache && !inMirror) {
+      await mirrorAsset(asset, fromCache.clone()).catch(() => {});
     }
   }
 
@@ -595,10 +595,6 @@ function bindFieldInputs() {
       upsertActiveRoi(state, { durationChoice: "servicePeriod" });
       markChanged();
     }
-  });
-  fields.roiNotes.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { notes: e.target.value });
-    markChanged();
   });
 
   fields.noticeSummary1.addEventListener("input", (e) => {
