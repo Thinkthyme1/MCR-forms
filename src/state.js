@@ -27,6 +27,8 @@ export function createEmptyRoi(id) {
     durationChoice: "servicePeriod",
     signature: "",
     parentSignature: "",
+    parentPrintedName: "",
+    staffWitnessSignature: "",
     date: nowDate(),
     time: nowTime()
   };
@@ -78,7 +80,9 @@ export function hasPhi(state) {
           r.init1a ||
           r.init2a ||
           r.signature ||
-          r.parentSignature
+          r.parentSignature ||
+          r.parentPrintedName ||
+          r.staffWitnessSignature
       ) ||
       state.notice.summary1 ||
       state.notice.summary2 ||

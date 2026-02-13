@@ -49,6 +49,8 @@ const ui = {
   addRoiBtn: $("addRoiBtn"),
   clearRoiSigBtn: $("clearRoiSigBtn"),
   clearRoiParentSigBtn: $("clearRoiParentSigBtn"),
+  clearRoiStaffWitnessSigBtn: $("clearRoiStaffWitnessSigBtn"),
+  roiStaffSignBtn: $("roiStaffSignBtn"),
   clearStaffSigBtn: $("clearStaffSigBtn"),
   clearNoticeSigBtn: $("clearNoticeSigBtn"),
   lockOverlay: $("lockOverlay"),
@@ -90,10 +92,13 @@ const fields = {
   roiInit2A: $("roiInit2A"),
   roiDurationOneYear: $("roiDurationOneYear"),
   roiDurationServicePeriod: $("roiDurationServicePeriod"),
-  roiPrintName: $("roiPrintName"),
-  roiTodayDate: $("roiTodayDate"),
-  roiStaffSignaturePreview: $("roiStaffSignaturePreview"),
-  roiStaffSignatureMissing: $("roiStaffSignatureMissing"),
+  roiParentPrintedName: $("roiParentPrintedName"),
+  roiClientPrintedName: $("roiClientPrintedName"),
+  roiClientDate: $("roiClientDate"),
+  roiParentDate: $("roiParentDate"),
+  roiStaffDate: $("roiStaffDate"),
+  roiStaffPrintedName: $("roiStaffPrintedName"),
+  roiStaffPrintedTitle: $("roiStaffPrintedTitle"),
   noticeClientName: $("noticeClientName"),
   noticeClientDob: $("noticeClientDob"),
   noticeStaffName: $("noticeStaffName"),
@@ -111,6 +116,27 @@ let noticeSigPad;
 
 function clone(obj) {
   return structuredClone(obj);
+}
+
+function todayDateString() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function clearDisplayCanvas(canvas) {
+  const ctx = canvas.getContext("2d", { alpha: false });
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawDataUrlOnCanvas(canvas, dataUrl) {
+  clearDisplayCanvas(canvas);
+  if (!dataUrl) return;
+  const img = new Image();
+  img.onload = () => {
+    const ctx = canvas.getContext("2d", { alpha: false });
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  };
+  img.src = dataUrl;
 }
 
 function renderView() {
@@ -169,17 +195,16 @@ function renderState() {
   fields.roiInit2A.value = roi.init2a || "";
   fields.roiDurationOneYear.checked = roi.durationChoice === "oneYear";
   fields.roiDurationServicePeriod.checked = roi.durationChoice !== "oneYear";
-  fields.roiPrintName.textContent = clientFullName(state);
-  fields.roiTodayDate.textContent = roi.date || new Date().toISOString().slice(0, 10);
-  if (state.staff.signature) {
-    fields.roiStaffSignaturePreview.src = state.staff.signature;
-    fields.roiStaffSignaturePreview.classList.remove("hidden");
-    fields.roiStaffSignatureMissing.classList.add("hidden");
-  } else {
-    fields.roiStaffSignaturePreview.removeAttribute("src");
-    fields.roiStaffSignaturePreview.classList.add("hidden");
-    fields.roiStaffSignatureMissing.classList.remove("hidden");
-  }
+  fields.roiParentPrintedName.value = roi.parentPrintedName || "";
+  const displayDate = roi.date || todayDateString();
+  fields.roiClientPrintedName.textContent = clientFullName(state);
+  fields.roiClientDate.textContent = displayDate;
+  fields.roiParentDate.textContent = displayDate;
+  fields.roiStaffDate.textContent = displayDate;
+  fields.roiStaffPrintedName.textContent = staffFullName(state);
+  fields.roiStaffPrintedTitle.textContent = state.staff.role || "";
+  drawDataUrlOnCanvas($("roiStaffWitnessSignature"), roi.staffWitnessSignature || "");
+  ui.roiStaffSignBtn.classList.toggle("hidden", Boolean(roi.staffWitnessSignature));
 
   fields.noticeSummary1.value = state.notice.summary1;
   fields.noticeSummary2.value = state.notice.summary2;
@@ -526,6 +551,7 @@ function bindFieldInputs() {
   });
   fields.staffRole.addEventListener("input", async (e) => {
     state.staff.role = e.target.value;
+    renderState();
     await saveStaffOnly();
   });
 
@@ -577,6 +603,10 @@ function bindFieldInputs() {
   fields.roiInit2A.addEventListener("input", (e) => {
     upsertActiveRoi(state, { init2a: e.target.value.toUpperCase() });
     e.target.value = e.target.value.toUpperCase();
+    markChanged();
+  });
+  fields.roiParentPrintedName.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { parentPrintedName: e.target.value });
     markChanged();
   });
   fields.roiDurationOneYear.addEventListener("change", (e) => {
@@ -679,6 +709,20 @@ function bindSignatures() {
   ui.clearRoiParentSigBtn.addEventListener("click", () => {
     roiParentSigPad.clear();
     upsertActiveRoi(state, { parentSignature: "" });
+    markChanged();
+  });
+  ui.roiStaffSignBtn.addEventListener("click", () => {
+    if (!state.staff.signature) {
+      showToast("Add staff signature in Staff Info first.");
+      return;
+    }
+    upsertActiveRoi(state, { staffWitnessSignature: state.staff.signature });
+    renderState();
+    markChanged();
+  });
+  ui.clearRoiStaffWitnessSigBtn.addEventListener("click", () => {
+    upsertActiveRoi(state, { staffWitnessSignature: "" });
+    renderState();
     markChanged();
   });
   ui.clearStaffSigBtn.addEventListener("click", async () => {

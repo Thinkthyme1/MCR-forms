@@ -160,6 +160,22 @@ input, textarea, select {
 }
 
 .signature-actions { display: flex; justify-content: flex-end; }
+.signature-meta-row {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.signature-meta-row p { margin: 0; }
+.roi-inline-box {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+.roi-inline-box input {
+  width: min(360px, 60vw);
+}
 .date-time-row { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .readonly-line { margin: 0; font-size: 0.95rem; }
 .roi-top-row {
@@ -309,21 +325,23 @@ input, textarea, select {
 .roi-duration-option .radio-filled {
   margin-top: 0.16rem;
 }
-.roi-sign-row {
-  display: grid;
-  gap: 0.6rem;
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
-  border-top: 1px solid #000;
-  padding-top: 0.5rem;
-}
-.roi-sign-row p {
-  margin: 0;
-}
 .roi-staff-signature-wrap {
   border: 1px solid var(--border);
   border-radius: 0.45rem;
   padding: 0.45rem;
   background: #fff;
+}
+.signature-pad-wrap {
+  position: relative;
+}
+.overlay-sign-btn {
+  position: absolute;
+  inset: auto auto 0.75rem 0.75rem;
+  border: 1px solid #0f766e;
+  background: #0f766e;
+  color: #fff;
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.65rem;
 }
 .signature-preview {
   display: block;
@@ -495,10 +513,6 @@ input, textarea, select {
     padding-top: 0.6rem;
   }
   .roi-initial-row {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-  }
-  .roi-sign-row {
     grid-template-columns: 1fr;
     gap: 0.35rem;
   }

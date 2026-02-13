@@ -205,25 +205,32 @@
             <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
             <h3>Signature of Individual/Consumer/Patient/Applicant</h3>
             <canvas id="roiSignature" class="signature-pad" width="640" height="180"></canvas>
-            <div class="signature-actions">
+            <div class="signature-actions signature-meta-row">
               <button id="clearRoiSigBtn" type="button">Clear Signature</button>
+              <p>Print Name: <span id="roiClientPrintedName"></span></p>
+              <p>Date: <span id="roiClientDate"></span></p>
             </div>
+
             <h3>Signature of Parent or Other Legally Authorized Representative (where applicable)</h3>
             <canvas id="roiParentSignature" class="signature-pad" width="640" height="180"></canvas>
-            <div class="signature-actions">
+            <div class="signature-actions signature-meta-row">
               <button id="clearRoiParentSigBtn" type="button">Clear Parent/Representative Signature</button>
+              <label class="roi-inline-box">Parent/Guardian/Custodian
+                <input id="roiParentPrintedName" type="text" autocomplete="off" />
+              </label>
+              <p>Date: <span id="roiParentDate"></span></p>
             </div>
+
             <h3>Signature of Witness (Staff)</h3>
-            <div class="roi-staff-signature-wrap">
-              <img id="roiStaffSignaturePreview" class="signature-preview hidden" alt="Staff signature preview" />
-              <p id="roiStaffSignatureMissing" class="muted hidden">
-                Add a signature in Staff Info to apply a persistent staff witness signature.
-              </p>
+            <div class="roi-staff-signature-wrap signature-pad-wrap">
+              <canvas id="roiStaffWitnessSignature" class="signature-pad" width="640" height="180"></canvas>
+              <button id="roiStaffSignBtn" class="overlay-sign-btn" type="button">Sign</button>
             </div>
-            <div class="roi-sign-row">
-              <p>Signature of Individual/Consumer/Patient/Applicant</p>
-              <p>Print Name: <span id="roiPrintName"></span></p>
-              <p>Date: <span id="roiTodayDate"></span></p>
+            <div class="signature-actions signature-meta-row">
+              <button id="clearRoiStaffWitnessSigBtn" type="button">Clear Staff Signature</button>
+              <p>Name: <span id="roiStaffPrintedName"></span></p>
+              <p>Title: <span id="roiStaffPrintedTitle"></span></p>
+              <p>Date: <span id="roiStaffDate"></span></p>
             </div>
           </form>
         </section>
