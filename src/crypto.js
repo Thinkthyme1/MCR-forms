@@ -11,9 +11,11 @@ export function generateSalt() {
 
 export function toBase64(bytes) {
   const arr = bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : bytes;
-  let binary = "";
-  for (let i = 0; i < arr.length; i += 1) binary += String.fromCharCode(arr[i]);
-  return btoa(binary);
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += 8192) {
+    chunks.push(String.fromCharCode.apply(null, arr.subarray(i, i + 8192)));
+  }
+  return btoa(chunks.join(""));
 }
 
 export function fromBase64(value) {

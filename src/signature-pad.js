@@ -1,5 +1,5 @@
 export function attachSignaturePad(canvas, onChange) {
-  const ctx = canvas.getContext("2d", { alpha: false });
+  const ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#111827";
@@ -31,10 +31,10 @@ export function attachSignaturePad(canvas, onChange) {
     const p = point(e);
     ctx.lineTo(p.x, p.y);
     ctx.stroke();
-    onChange?.();
   };
 
   const end = () => {
+    if (!drawing) return;
     drawing = false;
     onChange?.();
   };
@@ -64,7 +64,8 @@ export function attachSignaturePad(canvas, onChange) {
     },
     fromDataUrl(dataUrl) {
       if (!dataUrl) {
-        this.clear();
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         return;
       }
       const img = new Image();
