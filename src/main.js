@@ -156,8 +156,10 @@ function renderState() {
   bindLiveText();
   renderView();
 
-  roiSigPad.fromDataUrl(roi.signature);
-  noticeSigPad.fromDataUrl(state.notice.signature);
+  if (roiSigPad && noticeSigPad) {
+    roiSigPad.fromDataUrl(roi.signature);
+    noticeSigPad.fromDataUrl(state.notice.signature);
+  }
 }
 
 function updateInactivityTimer() {
