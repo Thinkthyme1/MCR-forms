@@ -288,6 +288,40 @@ input, textarea, select {
   border-top: 1px solid #000;
   margin: 0.15rem 0 0.25rem;
 }
+.roi-initials-block {
+  display: grid;
+  gap: 0.55rem;
+}
+.roi-initials-title {
+  margin: 0;
+  font-weight: 600;
+}
+.roi-initial-row {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  align-items: start;
+  gap: 0.55rem;
+}
+.roi-initial-boxes {
+  display: flex;
+  gap: 0.32rem;
+  justify-content: flex-start;
+}
+.roi-initial-input {
+  width: 58px;
+  padding: 0.2rem 0.25rem;
+  border: 1px solid #000;
+  border-radius: 0.2rem;
+  text-transform: uppercase;
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.roi-initial-text {
+  margin: 0;
+  line-height: 1.35;
+}
 
 .view-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0.5rem; }
 .roi-switcher { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; }
@@ -412,5 +446,9 @@ input, textarea, select {
     border-left: none;
     border-top: 1px solid #000;
     padding-top: 0.6rem;
+  }
+  .roi-initial-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
   }
 }

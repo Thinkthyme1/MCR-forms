@@ -23,6 +23,12 @@ export function createEmptyRoi(id) {
     leftFrom: true,
     rightTo: true,
     rightFrom: true,
+    init1a: "",
+    init1b: "",
+    init2a: "",
+    init2b: "",
+    init3a: "",
+    init3b: "",
     notes: "",
     summary: "",
     signature: "",
@@ -63,7 +69,25 @@ export function hasPhi(state) {
     state.general.firstName ||
       state.general.lastName ||
       state.general.dob ||
-      state.roi.instances.some((r) => r.purpose || r.recipient || r.notes || r.summary || r.signature) ||
+      state.roi.instances.some(
+        (r) =>
+          r.purpose ||
+          r.recipient ||
+          r.organization ||
+          r.careOf ||
+          r.address ||
+          r.phone ||
+          r.fax ||
+          r.init1a ||
+          r.init1b ||
+          r.init2a ||
+          r.init2b ||
+          r.init3a ||
+          r.init3b ||
+          r.notes ||
+          r.summary ||
+          r.signature
+      ) ||
       state.notice.summary1 ||
       state.notice.summary2 ||
       state.notice.summary3 ||

@@ -86,6 +86,12 @@ const fields = {
   roiLeftFrom: $("roiLeftFrom"),
   roiRightTo: $("roiRightTo"),
   roiRightFrom: $("roiRightFrom"),
+  roiInit1A: $("roiInit1A"),
+  roiInit1B: $("roiInit1B"),
+  roiInit2A: $("roiInit2A"),
+  roiInit2B: $("roiInit2B"),
+  roiInit3A: $("roiInit3A"),
+  roiInit3B: $("roiInit3B"),
   roiNotes: $("roiNotes"),
   roiSummary: $("roiSummary"),
   roiDate: $("roiDate"),
@@ -159,6 +165,12 @@ function renderState() {
   fields.roiLeftFrom.checked = roi.leftFrom !== false;
   fields.roiRightTo.checked = roi.rightTo !== false;
   fields.roiRightFrom.checked = roi.rightFrom !== false;
+  fields.roiInit1A.value = roi.init1a || "";
+  fields.roiInit1B.value = roi.init1b || "";
+  fields.roiInit2A.value = roi.init2a || "";
+  fields.roiInit2B.value = roi.init2b || "";
+  fields.roiInit3A.value = roi.init3a || "";
+  fields.roiInit3B.value = roi.init3b || "";
   fields.roiNotes.value = roi.notes || "";
   fields.roiSummary.value = roi.summary || "";
   fields.roiDate.value = roi.date || "";
@@ -546,6 +558,36 @@ function bindFieldInputs() {
   });
   fields.roiRightFrom.addEventListener("change", (e) => {
     upsertActiveRoi(state, { rightFrom: e.target.checked });
+    markChanged();
+  });
+  fields.roiInit1A.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { init1a: e.target.value.toUpperCase() });
+    e.target.value = e.target.value.toUpperCase();
+    markChanged();
+  });
+  fields.roiInit1B.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { init1b: e.target.value.toUpperCase() });
+    e.target.value = e.target.value.toUpperCase();
+    markChanged();
+  });
+  fields.roiInit2A.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { init2a: e.target.value.toUpperCase() });
+    e.target.value = e.target.value.toUpperCase();
+    markChanged();
+  });
+  fields.roiInit2B.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { init2b: e.target.value.toUpperCase() });
+    e.target.value = e.target.value.toUpperCase();
+    markChanged();
+  });
+  fields.roiInit3A.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { init3a: e.target.value.toUpperCase() });
+    e.target.value = e.target.value.toUpperCase();
+    markChanged();
+  });
+  fields.roiInit3B.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { init3b: e.target.value.toUpperCase() });
+    e.target.value = e.target.value.toUpperCase();
     markChanged();
   });
   fields.roiNotes.addEventListener("input", (e) => {

@@ -135,8 +135,45 @@
             </section>
             <hr class="roi-route-hr" />
 
-            <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
+            <section class="roi-initials-block" aria-label="ROI initials authorization section">
+              <p class="roi-initials-title">Initial the appropriate space below:</p>
+
+              <div class="roi-initial-row">
+                <div class="roi-initial-boxes">
+                  <input id="roiInit1A" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
+                  <input id="roiInit1B" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
+                </div>
+                <p class="roi-initial-text">
+                  I authorize the following information from my records (and any specific portion thereof).
+                </p>
+              </div>
+
+              <div class="roi-initial-row">
+                <div class="roi-initial-boxes">
+                  <input id="roiInit2A" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
+                  <input id="roiInit2B" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
+                </div>
+                <p class="roi-initial-text">
+                  I authorize the disclosure of alcohol or drug abuse information, if any. (Please see paragraph 2 below.) If I am a minor, my
+                  parent/guardian/court-ordered custodian and I BOTH must initial here in order for this information to be released.
+                </p>
+              </div>
+
+              <div class="roi-initial-row">
+                <div class="roi-initial-boxes">
+                  <input id="roiInit3A" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
+                  <input id="roiInit3B" class="roi-initial-input" type="text" maxlength="4" autocomplete="off" />
+                </div>
+                <p class="roi-initial-text">
+                  I authorize the disclosure of information, if any, concerning testing for HIV (human immunodeficiency virus) and/or treatment
+                  for HIV or AIDS (acquired immune deficiency syndrome) and any related conditions.
+                </p>
+              </div>
+            </section>
+            <hr class="roi-route-hr" />
+
             <label>Purpose of Disclosure <input id="roiPurpose" type="text" /></label>
+            <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
             <label>Recipient/Agency <input id="roiRecipient" type="text" /></label>
             <label>Notes <textarea id="roiNotes" rows="4"></textarea></label>
             <h3>ROI Legal Language</h3>
