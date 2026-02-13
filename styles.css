@@ -87,6 +87,7 @@ button {
   display: flex;
   align-items: stretch;
   gap: 0.4rem;
+  margin-top: 0.2rem;
 }
 .session-action-row > button,
 .session-action-row .hold-wrap > button {
