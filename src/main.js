@@ -203,11 +203,15 @@ async function startAutosave() {
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  await navigator.serviceWorker.register("/sw.js");
+  await navigator.serviceWorker.register("sw.js");
+}
+
+function resolveAssetUrl(path) {
+  return new URL(path, window.location.href).toString();
 }
 
 async function mirrorAsset(path) {
-  const response = await fetch(path, { cache: "reload" });
+  const response = await fetch(resolveAssetUrl(path), { cache: "reload" });
   if (!response.ok) throw new Error("asset fetch failed");
   const bytes = new Uint8Array(await response.arrayBuffer());
   await setAssetMirror(path, bytes);
@@ -217,13 +221,14 @@ async function verifyCriticalAssets() {
   const cache = await caches.open("mcr-forms-cache-v1");
   let missingAny = false;
   for (const asset of CRITICAL_ASSETS) {
-    const fromCache = await cache.match(asset);
+    const assetUrl = resolveAssetUrl(asset);
+    const fromCache = await cache.match(assetUrl);
     const inMirror = await hasAssetMirror(asset);
     if (!fromCache || !inMirror) {
       missingAny = true;
       if (navigator.onLine) {
         try {
-          await cache.add(asset);
+          await cache.add(assetUrl);
         } catch {
           // Keep warning behavior below if recache is not possible.
         }
@@ -670,9 +675,22 @@ async function bootstrap() {
 
   state.staff = await getStaffInfo();
 
-  await registerServiceWorker();
-  await verifyCriticalAssets();
-  await requestPersistentStorage();
+  try {
+    await registerServiceWorker();
+  } catch {
+    showToast("Service worker unavailable. Offline install may be limited.");
+  }
+  try {
+    await verifyCriticalAssets();
+  } catch {
+    ui.cacheWarning.textContent = "Some app files are missing. Connect to wifi and reload before going into the field.";
+    ui.cacheWarning.classList.remove("hidden");
+  }
+  try {
+    await requestPersistentStorage();
+  } catch {
+    // Continue if persist permission request is unavailable.
+  }
 
   bindFieldInputs();
   bindNav();

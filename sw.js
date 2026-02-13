@@ -1,23 +1,29 @@
 const CACHE_NAME = "mcr-forms-cache-v1";
 const CRITICAL_ASSETS = [
-  "/",
-  "/index.html",
-  "/styles.css",
-  "/manifest.webmanifest",
-  "/sw.js",
-  "/src/main.js",
-  "/src/constants.js",
-  "/src/state.js",
-  "/src/db.js",
-  "/src/crypto.js",
-  "/src/signature-pad.js",
-  "/src/pdf.js",
-  "/src/ui.js"
+  "./",
+  "index.html",
+  "styles.css",
+  "manifest.webmanifest",
+  "sw.js",
+  "src/main.js",
+  "src/constants.js",
+  "src/state.js",
+  "src/db.js",
+  "src/crypto.js",
+  "src/signature-pad.js",
+  "src/pdf.js",
+  "src/ui.js"
 ];
+
+function resolveAsset(path) {
+  return new URL(path, self.registration.scope).toString();
+}
+
+const RESOLVED_CRITICAL_ASSETS = CRITICAL_ASSETS.map(resolveAsset);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CRITICAL_ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(RESOLVED_CRITICAL_ASSETS)).then(() => self.skipWaiting())
   );
 });
 
@@ -51,6 +57,8 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("message", async (event) => {
   if (!event.data || event.data.type !== "GET_CRITICAL_STATUS") return;
   const cache = await caches.open(CACHE_NAME);
-  const statuses = await Promise.all(CRITICAL_ASSETS.map((asset) => cache.match(asset).then((hit) => ({ asset, cached: !!hit }))));
+  const statuses = await Promise.all(
+    RESOLVED_CRITICAL_ASSETS.map((asset) => cache.match(asset).then((hit) => ({ asset, cached: !!hit })))
+  );
   event.ports[0]?.postMessage({ statuses });
 });

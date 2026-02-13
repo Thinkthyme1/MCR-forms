@@ -29,6 +29,7 @@ export function setHoldToConfirm({ button, progress, onConfirm, holdMs = HOLD_CO
   };
 
   const start = (e) => {
+    if (e.type === "contextmenu") return;
     if (e.type === "keydown" && e.key !== " " && e.key !== "Enter") return;
     e.preventDefault();
     startedAt = performance.now();
@@ -49,6 +50,7 @@ export function setHoldToConfirm({ button, progress, onConfirm, holdMs = HOLD_CO
   };
 
   button.addEventListener("pointerdown", start);
+  button.addEventListener("contextmenu", (e) => e.preventDefault());
   button.addEventListener("pointerup", cancel);
   button.addEventListener("pointerleave", cancel);
   button.addEventListener("pointercancel", cancel);

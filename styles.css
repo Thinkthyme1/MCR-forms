@@ -14,6 +14,11 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; font-family: "Segoe UI", Tahoma, sans-serif; color: var(--text); background: linear-gradient(180deg, #e5e7eb 0%, var(--bg) 100%); }
 button, input, textarea, select { font: inherit; }
+button {
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: manipulation;
+}
 
 .app { min-height: 100vh; }
 

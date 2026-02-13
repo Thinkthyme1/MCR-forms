@@ -5,19 +5,19 @@ export const INACTIVITY_LOCK_MS = 30 * 60 * 1000;
 export const HOLD_CONFIRM_MS = 1500;
 
 export const CRITICAL_ASSETS = [
-  "/",
-  "/index.html",
-  "/styles.css",
-  "/manifest.webmanifest",
-  "/sw.js",
-  "/src/main.js",
-  "/src/constants.js",
-  "/src/state.js",
-  "/src/db.js",
-  "/src/crypto.js",
-  "/src/signature-pad.js",
-  "/src/pdf.js",
-  "/src/ui.js"
+  "./",
+  "index.html",
+  "styles.css",
+  "manifest.webmanifest",
+  "sw.js",
+  "src/main.js",
+  "src/constants.js",
+  "src/state.js",
+  "src/db.js",
+  "src/crypto.js",
+  "src/signature-pad.js",
+  "src/pdf.js",
+  "src/ui.js"
 ];
 
 export const ROI_LEGAL_PLACEHOLDER = `
