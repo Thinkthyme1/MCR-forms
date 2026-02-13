@@ -76,7 +76,6 @@ const fields = {
   staffRole: $("staffRole"),
   roiClientName: $("roiClientName"),
   roiClientDob: $("roiClientDob"),
-  roiStaffName: $("roiStaffName"),
   roiPurpose: $("roiPurpose"),
   roiOrganization: $("roiOrganization"),
   roiCareOf: $("roiCareOf"),
@@ -138,7 +137,6 @@ function renderView() {
 function bindLiveText() {
   fields.roiClientName.textContent = clientFullName(state);
   fields.roiClientDob.textContent = state.general.dob || "";
-  fields.roiStaffName.textContent = staffFullName(state);
   fields.noticeClientName.textContent = clientFullName(state);
   fields.noticeClientDob.textContent = state.general.dob || "";
   fields.noticeStaffName.textContent = staffFullName(state);
