@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="360" viewBox="0 0 560 360" role="img" aria-labelledby="title desc">
+  <title id="title">Benchmark Human Services Logo</title>
+  <desc id="desc">Stylized three-stripe Benchmark logo with company name</desc>
+  <rect width="560" height="360" fill="#ffffff"/>
+
+  <g transform="translate(66 56)">
+    <path d="M0 16 H384 V38 Q220 44 0 38 Z" fill="#c8c6b8"/>
+    <path d="M0 62 H384 V84 Q210 92 0 84 Z" fill="#7ba4a3"/>
+    <path d="M0 108 H384 V130 Q190 142 0 130 Z" fill="#1f7f77"/>
+
+    <path d="M160 18 Q260 18 384 18 V38 Q256 36 138 40 Z" fill="#8fcde8"/>
+    <path d="M170 64 Q270 64 384 64 V84 Q258 82 152 88 Z" fill="#2ea5d1"/>
+  </g>
+
+  <text x="66" y="242" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="800" letter-spacing="3" fill="#000000">BENCHMARK</text>
+  <text x="68" y="294" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="400" letter-spacing="11" fill="#111111">HUMAN SERVICES</text>
+</svg>

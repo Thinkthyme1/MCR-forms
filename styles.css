@@ -176,10 +176,15 @@ input, textarea, select {
   border-radius: 0.45rem;
   display: grid;
   place-items: center;
-  color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 600;
   background: #f8fafc;
+  overflow: hidden;
+  padding: 0.25rem;
+}
+.roi-logo-img {
+  width: 100%;
+  max-height: 98px;
+  object-fit: contain;
+  display: block;
 }
 .roi-client-meta {
   justify-self: end;

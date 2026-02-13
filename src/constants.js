@@ -9,6 +9,7 @@ export const CRITICAL_ASSETS = [
   "index.html",
   "styles.css",
   "manifest.webmanifest",
+  "assets/benchmark-logo.svg",
   "sw.js",
   "src/main.js",
   "src/constants.js",
