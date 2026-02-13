@@ -110,6 +110,7 @@ const fields = {
 
 let roiSigPad;
 let roiParentSigPad;
+let roiStaffWitnessPad;
 let staffSigPad;
 let noticeSigPad;
 
@@ -119,23 +120,6 @@ function clone(obj) {
 
 function todayDateString() {
   return new Date().toISOString().slice(0, 10);
-}
-
-function clearDisplayCanvas(canvas) {
-  const ctx = canvas.getContext("2d", { alpha: false });
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function drawDataUrlOnCanvas(canvas, dataUrl) {
-  clearDisplayCanvas(canvas);
-  if (!dataUrl) return;
-  const img = new Image();
-  img.onload = () => {
-    const ctx = canvas.getContext("2d", { alpha: false });
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  };
-  img.src = dataUrl;
 }
 
 function renderView() {
@@ -202,8 +186,6 @@ function renderState() {
   fields.roiStaffDate.textContent = displayDate;
   fields.roiStaffPrintedName.textContent = staffFullName(state);
   fields.roiStaffPrintedTitle.textContent = state.staff.role || "";
-  drawDataUrlOnCanvas($("roiStaffWitnessSignature"), roi.staffWitnessSignature || "");
-  ui.roiStaffSignBtn.classList.toggle("hidden", Boolean(roi.staffWitnessSignature));
 
   fields.noticeSummary1.value = state.notice.summary1;
   fields.noticeSummary2.value = state.notice.summary2;
@@ -215,9 +197,10 @@ function renderState() {
   bindLiveText();
   renderView();
 
-  if (roiSigPad && roiParentSigPad && staffSigPad && noticeSigPad) {
+  if (roiSigPad && roiParentSigPad && roiStaffWitnessPad && staffSigPad && noticeSigPad) {
     roiSigPad.fromDataUrl(roi.signature);
     roiParentSigPad.fromDataUrl(roi.parentSignature || "");
+    roiStaffWitnessPad.fromDataUrl(roi.staffWitnessSignature || "");
     staffSigPad.fromDataUrl(state.staff.signature || "");
     noticeSigPad.fromDataUrl(state.notice.signature);
   }
@@ -689,6 +672,11 @@ function bindSignatures() {
     upsertActiveRoi(state, { parentSignature: value });
     markChanged();
   });
+  roiStaffWitnessPad = attachSignaturePad($("roiStaffWitnessSignature"), () => {
+    const value = roiStaffWitnessPad.isBlank() ? "" : roiStaffWitnessPad.toDataUrl();
+    upsertActiveRoi(state, { staffWitnessSignature: value });
+    markChanged();
+  });
   staffSigPad = attachSignaturePad($("staffSignature"), async () => {
     state.staff.signature = staffSigPad.isBlank() ? "" : staffSigPad.toDataUrl();
     renderState();
@@ -715,9 +703,10 @@ function bindSignatures() {
       showToast("Add staff signature in Staff Info first.");
       return;
     }
-    // Apply only to the active ROI instance; other ROI instances remain unchanged.
+    // Applies only to the active ROI instance. Nothing auto-carries to other ROI instances.
     upsertActiveRoi(state, { staffWitnessSignature: state.staff.signature });
     renderState();
+    showToast("Staff signature applied to this ROI.");
     markChanged();
   });
   ui.clearStaffSigBtn.addEventListener("click", async () => {
