@@ -172,7 +172,6 @@ input, textarea, select {
 }
 .roi-logo-slot {
   min-height: 72px;
-  border: 1px dashed #94a3b8;
   border-radius: 0.45rem;
   display: grid;
   place-items: center;
