@@ -49,7 +49,6 @@ const ui = {
   addRoiBtn: $("addRoiBtn"),
   clearRoiSigBtn: $("clearRoiSigBtn"),
   clearRoiParentSigBtn: $("clearRoiParentSigBtn"),
-  clearRoiStaffWitnessSigBtn: $("clearRoiStaffWitnessSigBtn"),
   roiStaffSignBtn: $("roiStaffSignBtn"),
   clearStaffSigBtn: $("clearStaffSigBtn"),
   clearNoticeSigBtn: $("clearNoticeSigBtn"),
@@ -716,12 +715,8 @@ function bindSignatures() {
       showToast("Add staff signature in Staff Info first.");
       return;
     }
+    // Apply only to the active ROI instance; other ROI instances remain unchanged.
     upsertActiveRoi(state, { staffWitnessSignature: state.staff.signature });
-    renderState();
-    markChanged();
-  });
-  ui.clearRoiStaffWitnessSigBtn.addEventListener("click", () => {
-    upsertActiveRoi(state, { staffWitnessSignature: "" });
     renderState();
     markChanged();
   });
