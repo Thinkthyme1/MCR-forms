@@ -76,7 +76,6 @@ const fields = {
   roiClientDob: $("roiClientDob"),
   roiStaffName: $("roiStaffName"),
   roiPurpose: $("roiPurpose"),
-  roiRecipient: $("roiRecipient"),
   roiOrganization: $("roiOrganization"),
   roiCareOf: $("roiCareOf"),
   roiAddress: $("roiAddress"),
@@ -155,7 +154,6 @@ function renderState() {
 
   const roi = getActiveRoi(state);
   fields.roiPurpose.value = roi.purpose || "";
-  fields.roiRecipient.value = roi.recipient || "";
   fields.roiOrganization.value = roi.organization || "";
   fields.roiCareOf.value = roi.careOf || "";
   fields.roiAddress.value = roi.address || "";
@@ -518,10 +516,6 @@ function bindFieldInputs() {
 
   fields.roiPurpose.addEventListener("input", (e) => {
     upsertActiveRoi(state, { purpose: e.target.value });
-    markChanged();
-  });
-  fields.roiRecipient.addEventListener("input", (e) => {
-    upsertActiveRoi(state, { recipient: e.target.value });
     markChanged();
   });
   fields.roiOrganization.addEventListener("input", (e) => {

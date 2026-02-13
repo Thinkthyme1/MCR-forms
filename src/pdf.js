@@ -187,7 +187,7 @@ export async function createRoiPdf(state, roi, legalText) {
     `DOB: ${state.general.dob || ""}`,
     `Staff: ${state.staff.firstName} ${state.staff.lastName}`.trim(),
     `Purpose: ${roi.purpose || ""}`,
-    `Recipient/Agency: ${roi.recipient || ""}`
+    `Agency: ${roi.organization || ""}`
   ];
   const bodySections = [
     { heading: "Legal Text", text: legalText },
