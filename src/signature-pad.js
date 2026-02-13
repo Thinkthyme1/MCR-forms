@@ -1,5 +1,5 @@
 export function attachSignaturePad(canvas, onChange) {
-  const ctx = canvas.getContext("2d", { alpha: false });
+  const ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#111827";
