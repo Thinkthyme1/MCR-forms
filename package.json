@@ -1,0 +1,14 @@
+{
+  "name": "mcr-forms-offline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline-first crisis forms PWA for ROI and Notice forms",
+  "scripts": {
+    "start": "npx serve -s . -l 5173",
+    "audit": "npm audit --omit=dev"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "14.2.4"
+  }
+}

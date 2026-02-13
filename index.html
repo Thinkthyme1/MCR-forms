@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f2937" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>MCR Forms Offline</title>
+  </head>
+  <body>
+    <div id="app" class="app">
+      <section id="startupScreen" class="modal-screen" aria-live="polite">
+        <div class="card">
+          <h1>MCR Forms</h1>
+          <p id="startupMessage">Preparing secure offline workspace...</p>
+          <div id="startupActions" class="actions"></div>
+        </div>
+      </section>
+
+      <section id="cacheWarning" class="warning hidden" role="alert"></section>
+
+      <header class="top-panel collapsed" id="topPanel">
+        <button id="panelChevron" class="chevron" aria-expanded="false" aria-controls="panelContent">▼</button>
+        <div id="panelContent" class="panel-content">
+          <div class="button-group" id="formNav">
+            <button data-view="roi" type="button">ROI</button>
+            <button data-view="notice" type="button">Notice of Privacy Practices</button>
+            <button type="button" class="placeholder" disabled>Assessment (Coming Soon)</button>
+          </div>
+          <div class="button-group" id="infoNav">
+            <button data-view="general" type="button">General Info</button>
+            <button data-view="staff" type="button">Staff Info</button>
+          </div>
+          <div class="button-group session-controls">
+            <button id="lockBtn" type="button" class="hidden">Lock</button>
+            <div class="hold-wrap">
+              <div id="deleteProgress" class="hold-progress"></div>
+              <button id="deletePhiBtn" type="button" class="danger">Delete PHI</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main id="mainContent" class="main-content">
+        <div id="pdfActionWrap" class="pdf-action hidden">
+          <button id="createPdfBtn" type="button">Create PDF</button>
+        </div>
+
+        <section id="viewGeneral" class="view hidden">
+          <h2>General Info</h2>
+          <label>First Name <input id="generalFirstName" type="text" autocomplete="off" /></label>
+          <label>Last Name <input id="generalLastName" type="text" autocomplete="off" /></label>
+          <label>Date of Birth <input id="generalDob" type="date" /></label>
+        </section>
+
+        <section id="viewStaff" class="view hidden">
+          <h2>Staff Info</h2>
+          <label>First Name <input id="staffFirstName" type="text" autocomplete="off" /></label>
+          <label>Last Name <input id="staffLastName" type="text" autocomplete="off" /></label>
+          <div id="dirPickerWrap" class="hidden">
+            <button id="pickFolderBtn" type="button">Choose Default Save Folder</button>
+            <p id="folderStatus" class="muted"></p>
+          </div>
+        </section>
+
+        <section id="viewRoi" class="view hidden">
+          <div class="view-header">
+            <h2>Release of Information</h2>
+            <div class="roi-switcher">
+              <label for="roiSelect">ROI Instance</label>
+              <select id="roiSelect" aria-label="Select ROI instance"></select>
+              <button id="addRoiBtn" type="button">Add New ROI</button>
+            </div>
+          </div>
+
+          <form id="roiForm" class="form-card" autocomplete="off">
+            <p class="readonly-line"><strong>Client:</strong> <span id="roiClientName"></span></p>
+            <p class="readonly-line"><strong>DOB:</strong> <span id="roiClientDob"></span></p>
+            <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
+            <label>Purpose of Disclosure <input id="roiPurpose" type="text" /></label>
+            <label>Recipient/Agency <input id="roiRecipient" type="text" /></label>
+            <label>Notes <textarea id="roiNotes" rows="4"></textarea></label>
+            <h3>ROI Legal Language</h3>
+            <div class="legal-text" id="roiLegalText"></div>
+            <label>Summary (plain-language explanation) <textarea id="roiSummary" rows="3"></textarea></label>
+            <h3>Client Signature</h3>
+            <canvas id="roiSignature" class="signature-pad" width="640" height="180"></canvas>
+            <div class="signature-actions">
+              <button id="clearRoiSigBtn" type="button">Clear Signature</button>
+            </div>
+            <div class="date-time-row">
+              <label>Date <input id="roiDate" type="date" /></label>
+              <label>Time <input id="roiTime" type="time" /></label>
+            </div>
+          </form>
+        </section>
+
+        <section id="viewNotice" class="view hidden">
+          <h2>Notice of Privacy Practices</h2>
+          <form id="noticeForm" class="form-card" autocomplete="off">
+            <p class="readonly-line"><strong>Client:</strong> <span id="noticeClientName"></span></p>
+            <p class="readonly-line"><strong>DOB:</strong> <span id="noticeClientDob"></span></p>
+            <p class="readonly-line"><strong>Staff:</strong> <span id="noticeStaffName"></span></p>
+
+            <h3>Section 1 Summary</h3>
+            <textarea id="noticeSummary1" rows="2"></textarea>
+            <div class="legal-text" id="noticeLegal1"></div>
+
+            <h3>Section 2 Summary</h3>
+            <textarea id="noticeSummary2" rows="2"></textarea>
+            <div class="legal-text" id="noticeLegal2"></div>
+
+            <h3>Section 3 Summary</h3>
+            <textarea id="noticeSummary3" rows="2"></textarea>
+            <div class="legal-text" id="noticeLegal3"></div>
+
+            <h3>Client Signature</h3>
+            <canvas id="noticeSignature" class="signature-pad" width="640" height="180"></canvas>
+            <div class="signature-actions">
+              <button id="clearNoticeSigBtn" type="button">Clear Signature</button>
+            </div>
+            <div class="date-time-row">
+              <label>Date <input id="noticeDate" type="date" /></label>
+              <label>Time <input id="noticeTime" type="time" /></label>
+            </div>
+          </form>
+        </section>
+      </main>
+
+      <section id="lockOverlay" class="lock-overlay hidden" aria-modal="true" role="dialog">
+        <button id="continueBtn" class="continue-btn" type="button">Continue</button>
+        <div id="unlockPrompt" class="unlock-prompt hidden">
+          <h2>Enter PIN to Continue</h2>
+          <input id="unlockPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" />
+          <div class="actions">
+            <button id="unlockSubmit" type="button">Unlock</button>
+            <button id="unlockCancel" type="button">Cancel</button>
+          </div>
+          <p id="unlockError" class="error"></p>
+          <div id="forgotPinWrap" class="hidden">
+            <div id="forgotProgress" class="hold-progress"></div>
+            <button id="deleteFromLockBtn" class="danger" type="button">Delete case data and start over</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
