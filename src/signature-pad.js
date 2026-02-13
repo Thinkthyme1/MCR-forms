@@ -31,7 +31,6 @@ export function attachSignaturePad(canvas, onChange) {
     const p = point(e);
     ctx.lineTo(p.x, p.y);
     ctx.stroke();
-    onChange?.();
   };
 
   const end = () => {
@@ -64,7 +63,8 @@ export function attachSignaturePad(canvas, onChange) {
     },
     fromDataUrl(dataUrl) {
       if (!dataUrl) {
-        this.clear();
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         return;
       }
       const img = new Image();

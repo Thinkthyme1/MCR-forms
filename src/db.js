@@ -8,7 +8,10 @@ export const STORES = {
   assets: "assets"
 };
 
+let cachedDb = null;
+
 function openDb() {
+  if (cachedDb) return Promise.resolve(cachedDb);
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
@@ -18,7 +21,11 @@ function openDb() {
       if (!db.objectStoreNames.contains(STORES.meta)) db.createObjectStore(STORES.meta);
       if (!db.objectStoreNames.contains(STORES.assets)) db.createObjectStore(STORES.assets);
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      cachedDb = req.result;
+      cachedDb.onclose = () => { cachedDb = null; };
+      resolve(cachedDb);
+    };
     req.onerror = () => reject(req.error);
   });
 }
