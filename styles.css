@@ -127,6 +127,7 @@ input, textarea, select {
   border-radius: 0.4rem;
   border: 1px solid var(--border);
   background: #fff;
+  font-weight: 400;
 }
 
 .form-card {
