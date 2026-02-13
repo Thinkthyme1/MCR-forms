@@ -380,6 +380,11 @@ async function resumeOrStartFlow() {
 
 async function lockSession() {
   if (!hasPhi(state)) return;
+  try {
+    if (sessionKey) await savePhiEncrypted();
+  } catch {
+    showToast("Could not save before lock. Unlock may require start over.");
+  }
   clearSessionKey();
   ui.lockOverlay.classList.remove("hidden");
   ui.unlockPrompt.classList.add("hidden");
@@ -400,11 +405,8 @@ async function unlockSession(pin) {
     updateInactivityTimer();
   } catch (error) {
     if (!isWrongPinError(error)) {
-      await startNewClientFlow();
-      ui.lockOverlay.classList.add("hidden");
-      ui.unlockPrompt.classList.add("hidden");
-      ui.continueBtn.classList.remove("hidden");
-      showToast("Saved data was corrupted and has been reset.");
+      ui.unlockError.textContent = "Session data unavailable. Delete case data to start over.";
+      ui.forgotPinWrap.classList.remove("hidden");
       return;
     }
     ui.unlockError.textContent = "Incorrect PIN";
