@@ -82,6 +82,10 @@ const fields = {
   roiAddress: $("roiAddress"),
   roiPhone: $("roiPhone"),
   roiFax: $("roiFax"),
+  roiLeftTo: $("roiLeftTo"),
+  roiLeftFrom: $("roiLeftFrom"),
+  roiRightTo: $("roiRightTo"),
+  roiRightFrom: $("roiRightFrom"),
   roiNotes: $("roiNotes"),
   roiSummary: $("roiSummary"),
   roiDate: $("roiDate"),
@@ -151,6 +155,10 @@ function renderState() {
   fields.roiAddress.value = roi.address || "";
   fields.roiPhone.value = roi.phone || "";
   fields.roiFax.value = roi.fax || "";
+  fields.roiLeftTo.checked = roi.leftTo !== false;
+  fields.roiLeftFrom.checked = roi.leftFrom !== false;
+  fields.roiRightTo.checked = roi.rightTo !== false;
+  fields.roiRightFrom.checked = roi.rightFrom !== false;
   fields.roiNotes.value = roi.notes || "";
   fields.roiSummary.value = roi.summary || "";
   fields.roiDate.value = roi.date || "";
@@ -522,6 +530,22 @@ function bindFieldInputs() {
   });
   fields.roiFax.addEventListener("input", (e) => {
     upsertActiveRoi(state, { fax: e.target.value });
+    markChanged();
+  });
+  fields.roiLeftTo.addEventListener("change", (e) => {
+    upsertActiveRoi(state, { leftTo: e.target.checked });
+    markChanged();
+  });
+  fields.roiLeftFrom.addEventListener("change", (e) => {
+    upsertActiveRoi(state, { leftFrom: e.target.checked });
+    markChanged();
+  });
+  fields.roiRightTo.addEventListener("change", (e) => {
+    upsertActiveRoi(state, { rightTo: e.target.checked });
+    markChanged();
+  });
+  fields.roiRightFrom.addEventListener("change", (e) => {
+    upsertActiveRoi(state, { rightFrom: e.target.checked });
     markChanged();
   });
   fields.roiNotes.addEventListener("input", (e) => {

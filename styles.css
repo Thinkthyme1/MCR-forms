@@ -222,21 +222,35 @@ input, textarea, select {
   align-items: center;
   gap: 0.33rem;
   font-size: 0.88rem;
+  cursor: pointer;
+}
+.route-toggle {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
 }
 .radio-filled {
   width: 11px;
   height: 11px;
   border-radius: 999px;
   border: 1px solid #000;
-  background: #000;
+  background: #fff;
   display: inline-grid;
   place-items: center;
 }
 .radio-filled::after {
   content: "✓";
-  color: #fff;
+  color: transparent;
   font-size: 8px;
   line-height: 1;
+}
+.route-toggle:checked + .radio-filled {
+  background: #000;
+}
+.route-toggle:checked + .radio-filled::after {
+  color: #fff;
 }
 .roi-route-company {
   margin: 0;
