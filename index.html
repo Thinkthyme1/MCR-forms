@@ -79,8 +79,13 @@
           </div>
 
           <form id="roiForm" class="form-card" autocomplete="off">
-            <p class="readonly-line"><strong>Client:</strong> <span id="roiClientName"></span></p>
-            <p class="readonly-line"><strong>DOB:</strong> <span id="roiClientDob"></span></p>
+            <div class="roi-top-row">
+              <div class="roi-logo-slot" aria-label="Company logo area">Company Logo</div>
+              <div class="roi-client-meta">
+                <p class="readonly-line roi-client-name"><span id="roiClientName"></span></p>
+                <p class="readonly-line"><strong>DOB:</strong> <span id="roiClientDob"></span></p>
+              </div>
+            </div>
             <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
             <label>Purpose of Disclosure <input id="roiPurpose" type="text" /></label>
             <label>Recipient/Agency <input id="roiRecipient" type="text" /></label>

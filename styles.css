@@ -162,6 +162,35 @@ input, textarea, select {
 .signature-actions { display: flex; justify-content: flex-end; }
 .date-time-row { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .readonly-line { margin: 0; font-size: 0.95rem; }
+.roi-top-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.6rem;
+}
+.roi-logo-slot {
+  min-height: 72px;
+  border: 1px dashed #94a3b8;
+  border-radius: 0.45rem;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #f8fafc;
+}
+.roi-client-meta {
+  justify-self: end;
+  text-align: right;
+  display: grid;
+  gap: 0.3rem;
+}
+.roi-client-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
 
 .view-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0.5rem; }
 .roi-switcher { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; }
@@ -272,4 +301,11 @@ input, textarea, select {
   .button-group { width: 100%; }
   .button-group button { flex: 1; min-width: 130px; }
   .session-controls { align-self: stretch; }
+  .roi-top-row {
+    grid-template-columns: 1fr;
+  }
+  .roi-client-meta {
+    justify-self: start;
+    text-align: left;
+  }
 }
