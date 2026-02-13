@@ -86,6 +86,32 @@
                 <p class="readonly-line"><strong>DOB:</strong> <span id="roiClientDob"></span></p>
               </div>
             </div>
+
+            <section class="roi-route-grid" aria-label="ROI routing section">
+              <div class="roi-route-col roi-route-left">
+                <div class="roi-route-inset" aria-hidden="true">
+                  <div class="roi-route-mark"><span class="radio-filled"></span><span>To</span></div>
+                  <div class="roi-route-mark"><span class="radio-filled"></span><span>From</span></div>
+                </div>
+                <p class="roi-route-company">Benchmark Human Services</p>
+              </div>
+
+              <div class="roi-route-col roi-route-right">
+                <div class="roi-route-inset" aria-hidden="true">
+                  <div class="roi-route-mark"><span class="radio-filled"></span><span>To</span></div>
+                  <div class="roi-route-mark"><span class="radio-filled"></span><span>From</span></div>
+                </div>
+                <div class="roi-route-fields">
+                  <label>Organization <input id="roiOrganization" type="text" /></label>
+                  <label>C/O <input id="roiCareOf" type="text" /></label>
+                  <label>Address <textarea id="roiAddress" rows="3"></textarea></label>
+                  <label>Phone <input id="roiPhone" type="tel" /></label>
+                  <label>Fax <input id="roiFax" type="tel" /></label>
+                </div>
+              </div>
+            </section>
+            <hr class="roi-route-hr" />
+
             <p class="readonly-line"><strong>Staff:</strong> <span id="roiStaffName"></span></p>
             <label>Purpose of Disclosure <input id="roiPurpose" type="text" /></label>
             <label>Recipient/Agency <input id="roiRecipient" type="text" /></label>

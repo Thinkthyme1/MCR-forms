@@ -77,6 +77,11 @@ const fields = {
   roiStaffName: $("roiStaffName"),
   roiPurpose: $("roiPurpose"),
   roiRecipient: $("roiRecipient"),
+  roiOrganization: $("roiOrganization"),
+  roiCareOf: $("roiCareOf"),
+  roiAddress: $("roiAddress"),
+  roiPhone: $("roiPhone"),
+  roiFax: $("roiFax"),
   roiNotes: $("roiNotes"),
   roiSummary: $("roiSummary"),
   roiDate: $("roiDate"),
@@ -139,12 +144,17 @@ function renderState() {
   fields.staffLastName.value = state.staff.lastName;
 
   const roi = getActiveRoi(state);
-  fields.roiPurpose.value = roi.purpose;
-  fields.roiRecipient.value = roi.recipient;
-  fields.roiNotes.value = roi.notes;
-  fields.roiSummary.value = roi.summary;
-  fields.roiDate.value = roi.date;
-  fields.roiTime.value = roi.time;
+  fields.roiPurpose.value = roi.purpose || "";
+  fields.roiRecipient.value = roi.recipient || "";
+  fields.roiOrganization.value = roi.organization || "";
+  fields.roiCareOf.value = roi.careOf || "";
+  fields.roiAddress.value = roi.address || "";
+  fields.roiPhone.value = roi.phone || "";
+  fields.roiFax.value = roi.fax || "";
+  fields.roiNotes.value = roi.notes || "";
+  fields.roiSummary.value = roi.summary || "";
+  fields.roiDate.value = roi.date || "";
+  fields.roiTime.value = roi.time || "";
 
   fields.noticeSummary1.value = state.notice.summary1;
   fields.noticeSummary2.value = state.notice.summary2;
@@ -492,6 +502,26 @@ function bindFieldInputs() {
   });
   fields.roiRecipient.addEventListener("input", (e) => {
     upsertActiveRoi(state, { recipient: e.target.value });
+    markChanged();
+  });
+  fields.roiOrganization.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { organization: e.target.value });
+    markChanged();
+  });
+  fields.roiCareOf.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { careOf: e.target.value });
+    markChanged();
+  });
+  fields.roiAddress.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { address: e.target.value });
+    markChanged();
+  });
+  fields.roiPhone.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { phone: e.target.value });
+    markChanged();
+  });
+  fields.roiFax.addEventListener("input", (e) => {
+    upsertActiveRoi(state, { fax: e.target.value });
     markChanged();
   });
   fields.roiNotes.addEventListener("input", (e) => {
