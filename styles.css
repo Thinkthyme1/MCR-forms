@@ -660,8 +660,8 @@ input, textarea, select {
   object-fit: contain;
   flex-shrink: 0;
 }
-.pr-sig-img[src=""] {
-  visibility: hidden;
+.pr-sig-img:not([src]) {
+  display: none;
 }
 .pr-sig-meta {
   flex: 1;

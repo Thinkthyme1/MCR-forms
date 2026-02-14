@@ -144,6 +144,14 @@ function checkText(checked) {
   return checked ? "☑" : "☐";
 }
 
+function setSigSrc(img, dataUrl) {
+  if (dataUrl) {
+    img.src = dataUrl;
+  } else {
+    img.removeAttribute("src");
+  }
+}
+
 function renderPrintDivs() {
   const roi = getActiveRoi(state);
   const cName = clientFullName(state);
@@ -166,10 +174,10 @@ function renderPrintDivs() {
   $("prRoiPurpose").textContent = roi.purpose || "";
   $("prRoiDurationOneYear").textContent = checkText(roi.durationChoice === "oneYear");
   $("prRoiDurationService").textContent = checkText(roi.durationChoice !== "oneYear");
-  $("prRoiClientSig").src = roi.signature || "";
+  setSigSrc($("prRoiClientSig"), roi.signature);
   $("prRoiClientPrintedName").textContent = cName;
   $("prRoiClientSigDate").textContent = date;
-  $("prRoiParentSig").src = roi.parentSignature || "";
+  setSigSrc($("prRoiParentSig"), roi.parentSignature);
   $("prRoiParentPrintedName").textContent = roi.parentPrintedName || "";
   $("prRoiParentSigDate").textContent = date;
 
@@ -183,7 +191,7 @@ function renderPrintDivs() {
   $("prNoticeLegal1").textContent = NOTICE_SECTIONS[0].text;
   $("prNoticeLegal2").textContent = NOTICE_SECTIONS[1].text;
   $("prNoticeLegal3").textContent = NOTICE_SECTIONS[2].text;
-  $("prNoticeClientSig").src = state.notice.signature || "";
+  setSigSrc($("prNoticeClientSig"), state.notice.signature);
   $("prNoticeDate").textContent = state.notice.date || "";
   $("prNoticeTime").textContent = state.notice.time || "";
 }
@@ -585,13 +593,26 @@ async function savePdfBlob(blobOrBytes, filename) {
 }
 
 async function renderHtmlToPdfBlob(element) {
-  const opt = {
-    margin: 0,
-    image: { type: "png", quality: 1 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-  };
-  return window.html2pdf().set(opt).from(element).toPdf().output("blob");
+  /* html2canvas captures from the element's bounding rect — it must be
+     positioned inside the viewport.  Move it on-screen behind everything
+     for the duration of the render, then restore. */
+  element.style.left = "0";
+  element.style.top = "0";
+  element.style.zIndex = "-9999";
+
+  try {
+    const opt = {
+      margin: 0,
+      image: { type: "png", quality: 1 },
+      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+    };
+    return await window.html2pdf().set(opt).from(element).toPdf().output("blob");
+  } finally {
+    element.style.left = "";
+    element.style.top = "";
+    element.style.zIndex = "";
+  }
 }
 
 async function createPdfForActiveView() {
