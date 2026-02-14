@@ -11,6 +11,7 @@ export const CRITICAL_ASSETS = [
   "styles.css",
   "manifest.webmanifest",
   "assets/benchmark-logo.svg",
+  "vendor/html2pdf.bundle.min.js",
   "sw.js",
   "src/main.js",
   "src/constants.js",
