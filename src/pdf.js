@@ -195,8 +195,7 @@ async function buildRoiPdf(state, roi) {
   pushText(205, 764, "Release of Information", 16);
   pushText(margin, 742, `Client: ${(state.general.firstName || "").trim()} ${(state.general.lastName || "").trim()}`.trim(), 10);
   pushText(330, 742, `DOB: ${state.general.dob || ""}`, 10);
-  pushText(margin, 726, `Staff: ${(state.staff.firstName || "").trim()} ${(state.staff.lastName || "").trim()}`.trim(), 10);
-  pushText(330, 726, `Title: ${state.staff.role || ""}`, 10);
+  pushText(margin, 718, "AUTHORIZATION FOR RELEASE OF INFORMATION \u2013 STANDARD REQUEST", 10);
 
   const cardTop = 710;
   const cardBottom = 82;
@@ -238,40 +237,41 @@ async function buildRoiPdf(state, roi) {
   pushText(margin + 120, 482, `[${checkMark(roi.durationChoice === "oneYear")}] one (1) year`, 9);
   pushText(margin + 270, 482, `[${checkMark(roi.durationChoice !== "oneYear")}] service period`, 9);
 
-  const legalLines = wrapText(
-    "I understand this authorization may be redisclosed and may no longer be protected by federal privacy rule. I may withdraw this authorization at any time in writing, except to the extent action has already been taken in reliance on it.",
-    108
-  ).slice(0, 4);
-  for (const [i, line] of legalLines.entries()) {
-    pushText(margin + 10, 462 - i * 12, line, 9);
+  const legalParagraphs = [
+    "1. I understand that the information disclosed pursuant to this Authorization may be subject to re-disclosure by the recipient and no longer protected by federal privacy regulations or other applicable state or federal laws (except as set forth in paragraph 2 below).",
+    "2. I understand that, pursuant to 42 C.F.R. Part 2, substance use disorder records disclosed under this Authorization are subject to federal confidentiality protections. Depending on the recipient, these records may be re-disclosed in accordance with the HIPAA Privacy Rule or may require my written consent for any further re-disclosure. These records may not be used in any civil, criminal, administrative, or legislative proceeding against me without my specific written consent or a court order. Violations may result in civil and criminal penalties under federal law.",
+    "3. I understand that the Department of Behavioral Health and Developmental Disabilities will not condition my treatment, payment, or eligibility for any applicable benefits on whether I provide authorization for the requested release of information.",
+    "4. I intend this document to be a valid authorization conforming to all requirements of the Privacy Rule and State law, and understand that my authorization will remain in effect for: (PLEASE CHECK ONE)"
+  ];
+  let legalY = 462;
+  for (const para of legalParagraphs) {
+    const lines = wrapText(para, 108);
+    for (const line of lines) {
+      if (legalY < 110) break;
+      pushText(margin + 10, legalY, line, 8);
+      legalY -= 10;
+    }
+    legalY -= 4;
   }
 
   const sigTop = 390;
   const rowH = 92;
   drawOps.push(`${margin} ${sigTop - rowH} ${contentW} ${rowH} re S`);
   drawOps.push(`${margin} ${sigTop - rowH * 2} ${contentW} ${rowH} re S`);
-  drawOps.push(`${margin} ${sigTop - rowH * 3} ${contentW} ${rowH} re S`);
   drawOps.push(`${margin + 200} ${sigTop - rowH} m ${margin + 200} ${sigTop} l S`);
   drawOps.push(`${margin + 200} ${sigTop - rowH * 2} m ${margin + 200} ${sigTop - rowH} l S`);
-  drawOps.push(`${margin + 200} ${sigTop - rowH * 3} m ${margin + 200} ${sigTop - rowH * 2} l S`);
 
   const date = roi.date || "";
-  const staffName = `${(state.staff.firstName || "").trim()} ${(state.staff.lastName || "").trim()}`.trim();
   pushText(margin + 10, sigTop - 20, "Client Signature", 10);
   pushText(margin + 210, sigTop - 20, `Name: ${(state.general.firstName || "").trim()} ${(state.general.lastName || "").trim()}`.trim(), 9);
   pushText(margin + 210, sigTop - 38, `Date: ${date}`, 9);
   pushText(margin + 10, sigTop - rowH - 20, "Parent/Representative Signature", 10);
   pushText(margin + 210, sigTop - rowH - 20, `Name: ${roi.parentPrintedName || ""}`, 9);
   pushText(margin + 210, sigTop - rowH - 38, `Date: ${date}`, 9);
-  pushText(margin + 10, sigTop - rowH * 2 - 20, "Witness (Staff) Signature", 10);
-  pushText(margin + 210, sigTop - rowH * 2 - 20, `Name: ${staffName}`, 9);
-  pushText(margin + 210, sigTop - rowH * 2 - 38, `Title: ${state.staff.role || ""}`, 9);
-  pushText(margin + 210, sigTop - rowH * 2 - 54, `Date: ${date}`, 9);
 
   const signatureEntries = [
     { key: "SigClient", dataUrl: roi.signature, x: margin + 10, y: sigTop - rowH + 14 },
-    { key: "SigParent", dataUrl: roi.parentSignature || "", x: margin + 10, y: sigTop - rowH * 2 + 14 },
-    { key: "SigStaff", dataUrl: roi.staffWitnessSignature || "", x: margin + 10, y: sigTop - rowH * 3 + 14 }
+    { key: "SigParent", dataUrl: roi.parentSignature || "", x: margin + 10, y: sigTop - rowH * 2 + 14 }
   ];
 
   const xObjectEntries = [];
@@ -301,12 +301,12 @@ async function buildRoiPdf(state, roi) {
 
 export function buildFileName(formType, general) {
   const d = new Date();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
+  const m = String(d.getMonth() + 1);
+  const day = String(d.getDate());
   const yy = String(d.getFullYear()).slice(-2);
   const a = (general.firstName || "X")[0]?.toUpperCase() || "X";
   const b = (general.lastName || "X")[0]?.toUpperCase() || "X";
-  return `${mm}.${dd}.${yy} ${a}${b} ${formType}.pdf`;
+  return `${a}${b} ${m}.${day}.${yy} ${formType}.pdf`;
 }
 
 export async function createRoiPdf(state, roi) {

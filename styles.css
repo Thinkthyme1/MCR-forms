@@ -224,6 +224,13 @@ input, textarea, select {
   font-size: 1.1rem;
   font-weight: 700;
 }
+.roi-auth-title {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  letter-spacing: 0.02em;
+}
 .roi-route-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
