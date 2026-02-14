@@ -593,25 +593,31 @@ async function savePdfBlob(blobOrBytes, filename) {
 }
 
 async function renderHtmlToPdfBlob(element) {
-  /* html2canvas captures from the element's bounding rect — it must be
-     positioned inside the viewport.  Move it on-screen behind everything
-     for the duration of the render, then restore. */
-  element.style.left = "0";
-  element.style.top = "0";
-  element.style.zIndex = "-9999";
+  /* Clone the print-ready div and attach it directly to <body> with
+     position:fixed so html2canvas sees a fully-laid-out element inside
+     the viewport.  The clone avoids mutating the original and keeps
+     it free of parent-container clipping or scroll issues. */
+  const renderClone = element.cloneNode(true);
+  renderClone.removeAttribute("id");
+  renderClone.style.position = "fixed";
+  renderClone.style.left = "0";
+  renderClone.style.top = "0";
+  renderClone.style.zIndex = "-9999";
+  document.body.appendChild(renderClone);
+
+  /* Force synchronous layout so html2canvas reads real geometry. */
+  void renderClone.offsetHeight;
 
   try {
     const opt = {
       margin: 0,
       image: { type: "png", quality: 1 },
-      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: 816 },
       jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
     };
-    return await window.html2pdf().set(opt).from(element).toPdf().output("blob");
+    return await window.html2pdf().set(opt).from(renderClone).toPdf().output("blob");
   } finally {
-    element.style.left = "";
-    element.style.top = "";
-    element.style.zIndex = "";
+    document.body.removeChild(renderClone);
   }
 }
 
