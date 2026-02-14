@@ -1,10 +1,11 @@
-const CACHE_NAME = "mcr-forms-cache-v1";
+const CACHE_NAME = "mcr-forms-cache-v2";
 const CRITICAL_ASSETS = [
   "./",
   "index.html",
   "styles.css",
   "manifest.webmanifest",
   "assets/benchmark-logo.svg",
+  "vendor/html2pdf.bundle.min.js",
   "sw.js",
   "src/main.js",
   "src/constants.js",

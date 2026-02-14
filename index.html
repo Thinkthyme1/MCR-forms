@@ -276,8 +276,111 @@
       </section>
 
       <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+      <!-- ROI Print-Ready Div (hidden, rendered by html2pdf) -->
+      <div id="printRoi" class="print-ready" aria-hidden="true">
+        <div class="pr-header">
+          <img src="assets/benchmark-logo.svg" alt="" class="pr-logo" />
+          <div class="pr-client-info">
+            <p class="pr-client-name" id="prRoiClientName"></p>
+            <p><strong>DOB:</strong> <span id="prRoiClientDob"></span></p>
+          </div>
+        </div>
+        <h2 class="pr-title">AUTHORIZATION FOR RELEASE OF INFORMATION – STANDARD REQUEST</h2>
+        <div class="pr-route-grid">
+          <div class="pr-route-col">
+            <p><span id="prRoiLeftTo" class="pr-check"></span> To &nbsp; <span id="prRoiLeftFrom" class="pr-check"></span> From</p>
+            <p class="pr-company"><strong>Benchmark Human Services</strong></p>
+            <p>530 West Thomas Street, Suite C</p>
+            <p>Milledgeville, GA 31061</p>
+            <p>(478) 451-0557</p>
+          </div>
+          <div class="pr-route-col">
+            <p><span id="prRoiRightTo" class="pr-check"></span> To &nbsp; <span id="prRoiRightFrom" class="pr-check"></span> From</p>
+            <p>Agency: <span id="prRoiOrganization"></span></p>
+            <p>C/O: <span id="prRoiCareOf"></span></p>
+            <p>Address: <span id="prRoiAddress"></span></p>
+            <p>Phone: <span id="prRoiPhone"></span> &nbsp; Fax: <span id="prRoiFax"></span></p>
+          </div>
+        </div>
+        <div class="pr-initials-section">
+          <p class="pr-label">Initial the appropriate space below:</p>
+          <div class="pr-initial-row">
+            <span class="pr-initial-box" id="prRoiInit1a"></span>
+            <span>I authorize the disclosure of alcohol or drug abuse information, if any.</span>
+          </div>
+          <div class="pr-initial-row">
+            <span class="pr-initial-box" id="prRoiInit2a"></span>
+            <span>I authorize the disclosure of information, if any, concerning testing for HIV (human immunodeficiency virus) and/or treatment for HIV or AIDS (acquired immune deficiency syndrome) and any related conditions.</span>
+          </div>
+        </div>
+        <p class="pr-field"><span class="pr-label">Purpose of Disclosure:</span> <span id="prRoiPurpose"></span></p>
+        <p class="pr-field"><span class="pr-label">Duration (check one):</span> <span id="prRoiDurationOneYear" class="pr-check"></span> one (1) year. &nbsp; <span id="prRoiDurationService" class="pr-check"></span> the period necessary to complete all transactions on matters related to services provided to me.</p>
+        <div class="pr-legal">
+          <p>1. I understand that the information disclosed pursuant to this Authorization may be subject to re-disclosure by the recipient and no longer protected by federal privacy regulations or other applicable state or federal laws (except as set forth in paragraph 2 below).</p>
+          <p>2. I understand that, pursuant to 42 C.F.R. Part 2, substance use disorder records disclosed under this Authorization are subject to federal confidentiality protections. Depending on the recipient, these records may be re-disclosed in accordance with the HIPAA Privacy Rule or may require my written consent for any further re-disclosure. These records may not be used in any civil, criminal, administrative, or legislative proceeding against me without my specific written consent or a court order. Violations may result in civil and criminal penalties under federal law.</p>
+          <p>3. I understand that the Department of Behavioral Health and Developmental Disabilities will not condition my treatment, payment, or eligibility for any applicable benefits on whether I provide authorization for the requested release of information.</p>
+          <p>4. I intend this document to be a valid authorization conforming to all requirements of the Privacy Rule and State law, and understand that my authorization will remain in effect for: (PLEASE CHECK ONE)</p>
+        </div>
+        <hr class="pr-separator" />
+        <div class="pr-sig-block">
+          <p class="pr-label">Client Signature</p>
+          <div class="pr-sig-row">
+            <img id="prRoiClientSig" class="pr-sig-img" alt="" />
+            <div class="pr-sig-meta">
+              <p>Name: <span id="prRoiClientPrintedName"></span></p>
+              <p>Date: <span id="prRoiClientSigDate"></span></p>
+            </div>
+          </div>
+        </div>
+        <div class="pr-sig-block">
+          <p class="pr-label">Parent/Representative Signature</p>
+          <div class="pr-sig-row">
+            <img id="prRoiParentSig" class="pr-sig-img" alt="" />
+            <div class="pr-sig-meta">
+              <p>Name: <span id="prRoiParentPrintedName"></span></p>
+              <p>Date: <span id="prRoiParentSigDate"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notice Print-Ready Div (hidden, rendered by html2pdf) -->
+      <div id="printNotice" class="print-ready" aria-hidden="true">
+        <h2 class="pr-title">Notice of Privacy Practices</h2>
+        <p><strong>Client:</strong> <span id="prNoticeClientName"></span></p>
+        <p><strong>DOB:</strong> <span id="prNoticeClientDob"></span></p>
+        <p><strong>Staff:</strong> <span id="prNoticeStaffName"></span></p>
+        <div class="pr-notice-section">
+          <h3>Section 1 – Privacy Rights and Uses</h3>
+          <p id="prNoticeSummary1"></p>
+          <p class="pr-legal-text" id="prNoticeLegal1"></p>
+        </div>
+        <div class="pr-notice-section">
+          <h3>Section 2 – How Information May Be Shared</h3>
+          <p id="prNoticeSummary2"></p>
+          <p class="pr-legal-text" id="prNoticeLegal2"></p>
+        </div>
+        <div class="pr-notice-section">
+          <h3>Section 3 – Client Acknowledgement and Contact</h3>
+          <p id="prNoticeSummary3"></p>
+          <p class="pr-legal-text" id="prNoticeLegal3"></p>
+        </div>
+        <hr class="pr-separator" />
+        <div class="pr-sig-block">
+          <p class="pr-label">Client Signature</p>
+          <div class="pr-sig-row">
+            <img id="prNoticeClientSig" class="pr-sig-img" alt="" />
+            <div class="pr-sig-meta">
+              <p>Date: <span id="prNoticeDate"></span></p>
+              <p>Time: <span id="prNoticeTime"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <script src="vendor/html2pdf.bundle.min.js"></script>
     <script type="module" src="src/main.js"></script>
   </body>
 </html>

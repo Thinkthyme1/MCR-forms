@@ -23,7 +23,7 @@ import {
 } from "./db.js";
 import { decryptJson, deriveAesKey, encryptJson, generateSalt, toBase64, fromBase64 } from "./crypto.js";
 import { attachSignaturePad } from "./signature-pad.js";
-import { buildFileName, createNoticePdf, createRoiPdf } from "./pdf.js";
+import { buildFileName } from "./pdf.js";
 import { $, hideStartup, setHoldToConfirm, showToast, startupPrompt } from "./ui.js";
 import { clientFullName, createEmptyRoi, createInitialState, getActiveRoi, hasPhi, staffFullName, upsertActiveRoi } from "./state.js";
 
@@ -140,6 +140,54 @@ function bindLiveText() {
   fields.noticeStaffName.textContent = staffFullName(state);
 }
 
+function checkText(checked) {
+  return checked ? "☑" : "☐";
+}
+
+function renderPrintDivs() {
+  const roi = getActiveRoi(state);
+  const cName = clientFullName(state);
+  const date = roi.date || todayDateString();
+
+  /* ROI print div */
+  $("prRoiClientName").textContent = cName;
+  $("prRoiClientDob").textContent = state.general.dob || "";
+  $("prRoiLeftTo").textContent = checkText(roi.leftTo !== false);
+  $("prRoiLeftFrom").textContent = checkText(roi.leftFrom !== false);
+  $("prRoiRightTo").textContent = checkText(roi.rightTo !== false);
+  $("prRoiRightFrom").textContent = checkText(roi.rightFrom !== false);
+  $("prRoiOrganization").textContent = roi.organization || "";
+  $("prRoiCareOf").textContent = roi.careOf || "";
+  $("prRoiAddress").textContent = roi.address || "";
+  $("prRoiPhone").textContent = roi.phone || "";
+  $("prRoiFax").textContent = roi.fax || "";
+  $("prRoiInit1a").textContent = (roi.init1a || "").toUpperCase();
+  $("prRoiInit2a").textContent = (roi.init2a || "").toUpperCase();
+  $("prRoiPurpose").textContent = roi.purpose || "";
+  $("prRoiDurationOneYear").textContent = checkText(roi.durationChoice === "oneYear");
+  $("prRoiDurationService").textContent = checkText(roi.durationChoice !== "oneYear");
+  $("prRoiClientSig").src = roi.signature || "";
+  $("prRoiClientPrintedName").textContent = cName;
+  $("prRoiClientSigDate").textContent = date;
+  $("prRoiParentSig").src = roi.parentSignature || "";
+  $("prRoiParentPrintedName").textContent = roi.parentPrintedName || "";
+  $("prRoiParentSigDate").textContent = date;
+
+  /* Notice print div */
+  $("prNoticeClientName").textContent = cName;
+  $("prNoticeClientDob").textContent = state.general.dob || "";
+  $("prNoticeStaffName").textContent = staffFullName(state);
+  $("prNoticeSummary1").textContent = state.notice.summary1 || "";
+  $("prNoticeSummary2").textContent = state.notice.summary2 || "";
+  $("prNoticeSummary3").textContent = state.notice.summary3 || "";
+  $("prNoticeLegal1").textContent = NOTICE_SECTIONS[0].text;
+  $("prNoticeLegal2").textContent = NOTICE_SECTIONS[1].text;
+  $("prNoticeLegal3").textContent = NOTICE_SECTIONS[2].text;
+  $("prNoticeClientSig").src = state.notice.signature || "";
+  $("prNoticeDate").textContent = state.notice.date || "";
+  $("prNoticeTime").textContent = state.notice.time || "";
+}
+
 function populateRoiSelector() {
   ui.roiSelect.innerHTML = "";
   for (const roi of state.roi.instances) {
@@ -188,6 +236,7 @@ function renderState() {
 
   populateRoiSelector();
   bindLiveText();
+  renderPrintDivs();
   renderView();
 
   if (roiSigPad && roiParentSigPad && staffSigPad && noticeSigPad) {
@@ -268,7 +317,7 @@ async function mirrorAsset(path, response) {
 }
 
 async function verifyCriticalAssets() {
-  const cache = await caches.open("mcr-forms-cache-v1");
+  const cache = await caches.open("mcr-forms-cache-v2");
   let missingAny = false;
   for (const asset of CRITICAL_ASSETS) {
     const assetUrl = resolveAssetUrl(asset);
@@ -506,8 +555,10 @@ async function saveStaffOnly() {
   await setStaffInfo(clone(state.staff));
 }
 
-async function savePdfBlob(bytes, filename) {
-  const blob = new Blob([bytes], { type: "application/pdf" });
+async function savePdfBlob(blobOrBytes, filename) {
+  const blob = blobOrBytes instanceof Blob
+    ? blobOrBytes
+    : new Blob([blobOrBytes], { type: "application/pdf" });
 
   if (directoryHandle) {
     try {
@@ -533,16 +584,26 @@ async function savePdfBlob(bytes, filename) {
   showToast(`Downloaded ${filename}`);
 }
 
+async function renderHtmlToPdfBlob(element) {
+  const opt = {
+    margin: 0,
+    image: { type: "png", quality: 1 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+  };
+  return window.html2pdf().set(opt).from(element).toPdf().output("blob");
+}
+
 async function createPdfForActiveView() {
+  renderPrintDivs();
   if (state.currentView === "roi") {
-    const roi = getActiveRoi(state);
-    const pdfBytes = await createRoiPdf(state, roi);
-    await savePdfBlob(pdfBytes, buildFileName("ROI", state.general));
+    const blob = await renderHtmlToPdfBlob($("printRoi"));
+    await savePdfBlob(blob, buildFileName("ROI", state.general));
     return;
   }
   if (state.currentView === "notice") {
-    const pdfBytes = await createNoticePdf(state, NOTICE_SECTIONS);
-    await savePdfBlob(pdfBytes, buildFileName("Notice", state.general));
+    const blob = await renderHtmlToPdfBlob($("printNotice"));
+    await savePdfBlob(blob, buildFileName("Notice", state.general));
   }
 }
 
