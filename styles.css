@@ -77,6 +77,15 @@ button {
 .button-group button:hover { background: #4b5563; }
 .button-group button.placeholder { opacity: 0.65; }
 
+.roi-action-btn {
+  border: 1px solid #fff;
+  background: var(--panel-muted);
+  color: #fff;
+  border-radius: 0.4rem;
+  padding: 0.38rem 0.66rem;
+}
+.roi-action-btn:hover { background: #4b5563; }
+
 .session-controls {
   display: flex;
   flex-direction: column;
@@ -378,9 +387,9 @@ input, textarea, select {
   border: 1px solid #000;
   border-radius: 0.2rem;
   text-transform: uppercase;
-  font-family: "Times New Roman", Georgia, serif;
+  font-family: inherit;
   font-size: 1rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   text-align: center;
 }
 .roi-initial-text {

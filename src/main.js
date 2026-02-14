@@ -3,6 +3,7 @@ import {
   CRITICAL_ASSETS,
   HOLD_CONFIRM_MS,
   INACTIVITY_LOCK_MS,
+  MAX_PIN_ATTEMPTS,
   NOTICE_SECTIONS
 } from "./constants.js";
 import {
@@ -32,6 +33,8 @@ let pinSalt = null;
 let autosaveTimer = null;
 let inactivityTimer = null;
 let directoryHandle = null;
+let sessionEpoch = 0;
+let unlockFailedAttempts = 0;
 
 const ui = {
   topPanel: $("topPanel"),
@@ -229,8 +232,10 @@ function sessionPayload() {
 }
 
 async function savePhiEncrypted() {
+  const saveEpoch = sessionEpoch;
   if (!sessionKey || !hasPhi(state)) return;
   const encrypted = await encryptJson(sessionKey, sessionPayload());
+  if (saveEpoch !== sessionEpoch) return;
   await setSessionBlob(encrypted);
 }
 
@@ -241,6 +246,12 @@ async function startAutosave() {
       showToast("Auto-save failed");
     });
   }, AUTO_SAVE_MS);
+}
+
+function stopAutosave() {
+  if (!autosaveTimer) return;
+  clearInterval(autosaveTimer);
+  autosaveTimer = null;
 }
 
 async function registerServiceWorker() {
@@ -345,6 +356,8 @@ function isWrongPinError(error) {
 }
 
 async function wipePhi() {
+  sessionEpoch += 1;
+  stopAutosave();
   await overwriteAndDelete(STORES.phi, "sessionBlob");
   await overwriteAndDelete(STORES.meta, "pinSalt");
   await deleteSalt();
@@ -366,6 +379,7 @@ async function startNewClientFlow() {
   await wipePhi();
   await setNewPinFlow();
   await savePhiEncrypted();
+  await startAutosave();
   showToast("Ready for new client.");
   updateInactivityTimer();
 }
@@ -373,6 +387,7 @@ async function startNewClientFlow() {
 async function resumeOrStartFlow() {
   const existingBlob = await getSessionBlob();
   const existingSalt = await getSalt();
+  let startupFailedAttempts = 0;
 
   if (existingBlob && existingSalt) {
     while (true) {
@@ -399,11 +414,25 @@ async function resumeOrStartFlow() {
 
       try {
         await tryUnlockWithPin(pinResult.values[0]);
+        startupFailedAttempts = 0;
         hideStartup();
         return;
       } catch (error) {
         if (isWrongPinError(error)) {
-          pinResult.setError("Incorrect PIN, try again.");
+          startupFailedAttempts += 1;
+          if (startupFailedAttempts >= MAX_PIN_ATTEMPTS) {
+            await wipePhi();
+            await startupPrompt({
+              title: "Too Many Incorrect PIN Attempts",
+              message: "For security, case data was deleted after 5 failed attempts. Start a new client session.",
+              primaryLabel: "Start New Session",
+              hideSecondary: true
+            });
+            await setNewPinFlow();
+            return;
+          }
+          const attemptsRemaining = MAX_PIN_ATTEMPTS - startupFailedAttempts;
+          pinResult.setError(`Incorrect PIN. ${attemptsRemaining} attempt${attemptsRemaining === 1 ? "" : "s"} remaining.`);
           continue;
         }
         await wipePhi();
@@ -430,6 +459,7 @@ async function lockSession() {
     showToast("Could not save before lock. Unlock may require start over.");
   }
   clearSessionKey();
+  unlockFailedAttempts = 0;
   ui.lockOverlay.classList.remove("hidden");
   ui.unlockPrompt.classList.add("hidden");
   ui.continueBtn.classList.remove("hidden");
@@ -438,6 +468,7 @@ async function lockSession() {
 async function unlockSession(pin) {
   try {
     await tryUnlockWithPin(pin);
+    unlockFailedAttempts = 0;
     ui.lockOverlay.classList.add("hidden");
     ui.unlockPrompt.classList.add("hidden");
     ui.continueBtn.classList.remove("hidden");
@@ -453,7 +484,21 @@ async function unlockSession(pin) {
       ui.forgotPinWrap.classList.remove("hidden");
       return;
     }
-    ui.unlockError.textContent = "Incorrect PIN";
+    unlockFailedAttempts += 1;
+    if (unlockFailedAttempts >= MAX_PIN_ATTEMPTS) {
+      await startNewClientFlow();
+      ui.lockOverlay.classList.add("hidden");
+      ui.unlockPrompt.classList.add("hidden");
+      ui.continueBtn.classList.remove("hidden");
+      ui.unlockError.textContent = "";
+      ui.unlockPin.value = "";
+      ui.forgotPinWrap.classList.add("hidden");
+      unlockFailedAttempts = 0;
+      showToast("Too many incorrect PIN attempts. Case data deleted.");
+      return;
+    }
+    const attemptsRemaining = MAX_PIN_ATTEMPTS - unlockFailedAttempts;
+    ui.unlockError.textContent = `Incorrect PIN. ${attemptsRemaining} attempt${attemptsRemaining === 1 ? "" : "s"} remaining.`;
     ui.forgotPinWrap.classList.remove("hidden");
   }
 }

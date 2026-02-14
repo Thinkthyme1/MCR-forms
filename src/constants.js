@@ -3,6 +3,7 @@ export const PBKDF2_ITERATIONS = 600000;
 export const AUTO_SAVE_MS = 30000;
 export const INACTIVITY_LOCK_MS = 30 * 60 * 1000;
 export const HOLD_CONFIRM_MS = 1500;
+export const MAX_PIN_ATTEMPTS = 5;
 
 export const CRITICAL_ASSETS = [
   "./",
