@@ -85,6 +85,10 @@ button {
   padding: 0.38rem 0.66rem;
 }
 .roi-action-btn:hover { background: #4b5563; }
+.roi-top-action-btn {
+  min-width: 9.4rem;
+  height: 2.1rem;
+}
 
 .session-controls {
   display: flex;
@@ -398,7 +402,7 @@ input, textarea, select {
 }
 
 .view-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0.5rem; }
-.roi-switcher { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; }
+.roi-switcher { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
 
 .pdf-action {
   position: sticky;
@@ -406,7 +410,7 @@ input, textarea, select {
   z-index: 30;
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .pdf-action button {

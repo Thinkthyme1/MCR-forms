@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log*
 .DS_Store
 *.swp
+HOURS_WORKED.md
+forms/

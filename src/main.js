@@ -218,6 +218,13 @@ function markChanged() {
   renderView();
 }
 
+function scrubPhiFromMemoryAndUi() {
+  const savedStaff = clone(state.staff);
+  state = createInitialState();
+  state.staff = savedStaff;
+  renderState();
+}
+
 function clearSessionKey() {
   sessionKey = null;
 }
@@ -459,6 +466,7 @@ async function lockSession() {
     showToast("Could not save before lock. Unlock may require start over.");
   }
   clearSessionKey();
+  scrubPhiFromMemoryAndUi();
   unlockFailedAttempts = 0;
   ui.lockOverlay.classList.remove("hidden");
   ui.unlockPrompt.classList.add("hidden");
@@ -842,7 +850,20 @@ async function setupDirectoryPicker() {
   });
 }
 
+function blockIfEmbeddedFrame() {
+  let isEmbedded = false;
+  try {
+    isEmbedded = window.top !== window.self;
+  } catch {
+    isEmbedded = true;
+  }
+  if (!isEmbedded) return;
+  document.body.innerHTML = `<main style="font-family: Segoe UI, Tahoma, sans-serif; padding: 2rem; color: #111827; background: #f3f4f6; min-height: 100vh;"><h1 style="margin-top: 0;">Blocked</h1><p>This app cannot run inside an embedded frame.</p></main>`;
+  throw new Error("Blocked embedded frame context");
+}
+
 async function bootstrap() {
+  blockIfEmbeddedFrame();
   ui.noticeLegal1.textContent = NOTICE_SECTIONS[0].text;
   ui.noticeLegal2.textContent = NOTICE_SECTIONS[1].text;
   ui.noticeLegal3.textContent = NOTICE_SECTIONS[2].text;

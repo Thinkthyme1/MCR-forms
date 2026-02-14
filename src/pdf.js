@@ -171,6 +171,134 @@ async function buildPdf({ title, subtitleLines, bodySections, signatureDataUrl, 
   return doc.finalize(catalogObj);
 }
 
+function checkMark(value) {
+  return value ? "X" : " ";
+}
+
+async function buildRoiPdf(state, roi) {
+  const doc = new PdfDoc();
+  const pageW = 612;
+  const pageH = 792;
+  const margin = 36;
+  const contentW = pageW - margin * 2;
+  const leftColW = 250;
+
+  const fontObj = doc.addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+
+  const textLines = [];
+  const drawOps = [];
+
+  const pushText = (x, y, text, size = 10) => {
+    textLines.push({ x, y, size, text: String(text || "") });
+  };
+
+  pushText(205, 764, "Release of Information", 16);
+  pushText(margin, 742, `Client: ${(state.general.firstName || "").trim()} ${(state.general.lastName || "").trim()}`.trim(), 10);
+  pushText(330, 742, `DOB: ${state.general.dob || ""}`, 10);
+  pushText(margin, 726, `Staff: ${(state.staff.firstName || "").trim()} ${(state.staff.lastName || "").trim()}`.trim(), 10);
+  pushText(330, 726, `Title: ${state.staff.role || ""}`, 10);
+
+  const cardTop = 710;
+  const cardBottom = 82;
+  drawOps.push(`${margin} ${cardBottom} ${contentW} ${cardTop - cardBottom} re S`);
+
+  const routeTop = 692;
+  const routeBottom = 582;
+  drawOps.push(`${margin} ${routeBottom} ${contentW} ${routeTop - routeBottom} re S`);
+  drawOps.push(`${margin + leftColW} ${routeBottom} m ${margin + leftColW} ${routeTop} l S`);
+
+  pushText(margin + 10, 676, `[${checkMark(roi.leftTo !== false)}] To`, 10);
+  pushText(margin + 10, 660, `[${checkMark(roi.leftFrom !== false)}] From`, 10);
+  pushText(margin + 10, 642, "Benchmark Human Services", 10);
+  pushText(margin + 10, 628, "530 West Thomas Street, Suite C", 9);
+  pushText(margin + 10, 614, "Milledgeville, GA 31061", 9);
+  pushText(margin + 10, 600, "(478) 451-0557", 9);
+
+  const rightX = margin + leftColW + 10;
+  pushText(rightX, 676, `[${checkMark(roi.rightTo !== false)}] To`, 10);
+  pushText(rightX + 80, 676, `[${checkMark(roi.rightFrom !== false)}] From`, 10);
+  pushText(rightX, 658, `Agency: ${roi.organization || ""}`, 9);
+  pushText(rightX, 644, `C/O: ${roi.careOf || ""}`, 9);
+  for (const [i, line] of wrapText(`Address: ${roi.address || ""}`, 48).slice(0, 2).entries()) {
+    pushText(rightX, 630 - i * 12, line, 9);
+  }
+  pushText(rightX, 606, `Phone: ${roi.phone || ""}`, 9);
+  pushText(rightX + 120, 606, `Fax: ${roi.fax || ""}`, 9);
+
+  pushText(margin + 10, 564, "Initial the appropriate space below:", 10);
+  drawOps.push(`${margin + 10} 542 20 16 re S`);
+  drawOps.push(`${margin + 10} 520 20 16 re S`);
+  pushText(margin + 15, 546, (roi.init1a || "").toUpperCase().slice(0, 4), 9);
+  pushText(margin + 15, 524, (roi.init2a || "").toUpperCase().slice(0, 4), 9);
+  pushText(margin + 38, 546, "I authorize disclosure of alcohol or drug abuse information.", 9);
+  pushText(margin + 38, 524, "I authorize disclosure of HIV/AIDS testing/treatment information.", 9);
+
+  pushText(margin + 10, 500, `Purpose of Disclosure: ${roi.purpose || ""}`, 10);
+  pushText(margin + 10, 482, "Duration (check one):", 9);
+  pushText(margin + 120, 482, `[${checkMark(roi.durationChoice === "oneYear")}] one (1) year`, 9);
+  pushText(margin + 270, 482, `[${checkMark(roi.durationChoice !== "oneYear")}] service period`, 9);
+
+  const legalLines = wrapText(
+    "I understand this authorization may be redisclosed and may no longer be protected by federal privacy rule. I may withdraw this authorization at any time in writing, except to the extent action has already been taken in reliance on it.",
+    108
+  ).slice(0, 4);
+  for (const [i, line] of legalLines.entries()) {
+    pushText(margin + 10, 462 - i * 12, line, 9);
+  }
+
+  const sigTop = 390;
+  const rowH = 92;
+  drawOps.push(`${margin} ${sigTop - rowH} ${contentW} ${rowH} re S`);
+  drawOps.push(`${margin} ${sigTop - rowH * 2} ${contentW} ${rowH} re S`);
+  drawOps.push(`${margin} ${sigTop - rowH * 3} ${contentW} ${rowH} re S`);
+  drawOps.push(`${margin + 200} ${sigTop - rowH} m ${margin + 200} ${sigTop} l S`);
+  drawOps.push(`${margin + 200} ${sigTop - rowH * 2} m ${margin + 200} ${sigTop - rowH} l S`);
+  drawOps.push(`${margin + 200} ${sigTop - rowH * 3} m ${margin + 200} ${sigTop - rowH * 2} l S`);
+
+  const date = roi.date || "";
+  const staffName = `${(state.staff.firstName || "").trim()} ${(state.staff.lastName || "").trim()}`.trim();
+  pushText(margin + 10, sigTop - 20, "Client Signature", 10);
+  pushText(margin + 210, sigTop - 20, `Name: ${(state.general.firstName || "").trim()} ${(state.general.lastName || "").trim()}`.trim(), 9);
+  pushText(margin + 210, sigTop - 38, `Date: ${date}`, 9);
+  pushText(margin + 10, sigTop - rowH - 20, "Parent/Representative Signature", 10);
+  pushText(margin + 210, sigTop - rowH - 20, `Name: ${roi.parentPrintedName || ""}`, 9);
+  pushText(margin + 210, sigTop - rowH - 38, `Date: ${date}`, 9);
+  pushText(margin + 10, sigTop - rowH * 2 - 20, "Witness (Staff) Signature", 10);
+  pushText(margin + 210, sigTop - rowH * 2 - 20, `Name: ${staffName}`, 9);
+  pushText(margin + 210, sigTop - rowH * 2 - 38, `Title: ${state.staff.role || ""}`, 9);
+  pushText(margin + 210, sigTop - rowH * 2 - 54, `Date: ${date}`, 9);
+
+  const signatureEntries = [
+    { key: "SigClient", dataUrl: roi.signature, x: margin + 10, y: sigTop - rowH + 14 },
+    { key: "SigParent", dataUrl: roi.parentSignature || "", x: margin + 10, y: sigTop - rowH * 2 + 14 },
+    { key: "SigStaff", dataUrl: roi.staffWitnessSignature || "", x: margin + 10, y: sigTop - rowH * 3 + 14 }
+  ];
+
+  const xObjectEntries = [];
+  const imageOps = [];
+  for (const entry of signatureEntries) {
+    const signature = await signatureToJpeg(entry.dataUrl);
+    if (!signature) continue;
+    const imgHeader = asciiBytes(
+      `<< /Type /XObject /Subtype /Image /Width ${signature.width} /Height ${signature.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${signature.bytes.length} >>\nstream\n`
+    );
+    const imageObjId = doc.addObject(concatBytes([imgHeader, signature.bytes, asciiBytes("\nendstream")]));
+    xObjectEntries.push(`/${entry.key} ${imageObjId} 0 R`);
+    imageOps.push(`q 180 0 0 62 ${entry.x} ${entry.y} cm /${entry.key} Do Q`);
+  }
+
+  const contentText = buildTextOps(textLines);
+  const xObjectPart = xObjectEntries.length ? ` /XObject << ${xObjectEntries.join(" ")} >>` : "";
+  const resources = `<< /Font << /F1 ${fontObj} 0 R >>${xObjectPart} >>`;
+  const contentStream = `${drawOps.join("\n")}\n${contentText}\n${imageOps.join("\n")}`;
+  const contentObj = doc.addObject(`<< /Length ${contentStream.length} >>\nstream\n${contentStream}\nendstream`);
+  const pageObj = doc.addObject(`<< /Type /Page /Parent 0 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources ${resources} /Contents ${contentObj} 0 R >>`);
+  const pagesObj = doc.addObject(`<< /Type /Pages /Kids [${pageObj} 0 R] /Count 1 >>`);
+  doc.objects[pageObj - 1] = doc.objects[pageObj - 1].replace("/Parent 0 0 R", `/Parent ${pagesObj} 0 R`);
+  const catalogObj = doc.addObject(`<< /Type /Catalog /Pages ${pagesObj} 0 R >>`);
+  return doc.finalize(catalogObj);
+}
+
 export function buildFileName(formType, general) {
   const d = new Date();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -182,26 +310,7 @@ export function buildFileName(formType, general) {
 }
 
 export async function createRoiPdf(state, roi) {
-  const subtitleLines = [
-    `Client: ${state.general.firstName} ${state.general.lastName}`.trim(),
-    `DOB: ${state.general.dob || ""}`,
-    `Staff: ${state.staff.firstName} ${state.staff.lastName}`.trim(),
-    `Purpose: ${roi.purpose || ""}`,
-    `Agency: ${roi.organization || ""}`
-  ];
-  const bodySections = [
-    { heading: "Address", text: roi.address || "" },
-    { heading: "Phone/Fax", text: `Phone: ${roi.phone || ""} Fax: ${roi.fax || ""}` },
-    { heading: "Notes", text: roi.notes || "" }
-  ];
-  return buildPdf({
-    title: "Release of Information",
-    subtitleLines,
-    bodySections,
-    signatureDataUrl: roi.signature,
-    signedDate: roi.date,
-    signedTime: roi.time
-  });
+  return buildRoiPdf(state, roi);
 }
 
 export async function createNoticePdf(state, legalSections) {
