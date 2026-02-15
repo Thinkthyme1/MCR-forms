@@ -602,11 +602,23 @@ function createPdfForActiveView() {
 
   /* Bring it on-screen, fire the browser print dialog, then hide it
      again.  The @media print rules in styles.css hide the app shell
-     and show only the .printing div. */
+     and show only the .printing div.
+
+     We must wait for the browser to repaint after the class change
+     before calling window.print(), otherwise the print snapshot may
+     capture the old layout (blank page). */
   const el = $(printId);
   el.classList.add("printing");
-  window.print();
-  el.classList.remove("printing");
+
+  function cleanup() {
+    el.classList.remove("printing");
+    window.removeEventListener("afterprint", cleanup);
+  }
+  window.addEventListener("afterprint", cleanup);
+
+  requestAnimationFrame(() => {
+    window.print();
+  });
 }
 
 function bindFieldInputs() {
