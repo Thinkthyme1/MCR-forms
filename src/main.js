@@ -333,17 +333,44 @@ async function registerServiceWorker() {
   reg.update().catch(() => {});
 }
 
-async function checkForAppUpdate() {
+const UPDATE_CHECK_KEY = "mcr_update_checked";
+
+/**
+ * Check for a SW update and reload if one is found.
+ *
+ * Shows a spinner in `containerEl` while checking.  Uses a sessionStorage
+ * flag to avoid infinite reload loops: the first call triggers the update
+ * and reloads; the second call (after reload) sees the flag, clears it,
+ * and returns immediately so the PIN input can appear.
+ *
+ * @param {HTMLElement} containerEl — element to append the spinner to
+ * @returns {Promise<void>} resolves when the PIN input should be shown
+ */
+async function checkForUpdateBeforePin(containerEl) {
+  // Already checked this page-load (post-reload) — skip.
+  if (sessionStorage.getItem(UPDATE_CHECK_KEY)) {
+    sessionStorage.removeItem(UPDATE_CHECK_KEY);
+    return;
+  }
+
   if (!navigator.onLine || !("serviceWorker" in navigator)) return;
   const reg = await navigator.serviceWorker.getRegistration();
   if (!reg) return;
 
+  // Show spinner while we talk to the network
+  const spinner = document.createElement("div");
+  spinner.className = "spinner";
+  containerEl.appendChild(spinner);
+
   try {
     await reg.update();
-  } catch { return; }
+  } catch {
+    spinner.remove();
+    return;
+  }
 
   const pending = reg.installing || reg.waiting;
-  if (!pending) return;
+  if (!pending) { spinner.remove(); return; }
 
   /* Wait for the new SW to finish activating (skipWaiting fires
      immediately after install, so this is usually fast). */
@@ -359,8 +386,12 @@ async function checkForAppUpdate() {
     setTimeout(() => resolve(false), 15000);
   });
 
+  spinner.remove();
+
   if (!activated) return;
 
+  // Update landed — set flag so the reload doesn't loop, then reload.
+  sessionStorage.setItem(UPDATE_CHECK_KEY, "1");
   window.location.reload();
 }
 
@@ -453,6 +484,7 @@ async function setNewPinFlow() {
     await setSalt(toBase64(pinSalt));
     await setPepper(pepper);
     hideStartup();
+
     return;
   }
 }
@@ -501,7 +533,6 @@ async function wipePhi() {
 async function startNewClientFlow() {
   await wipePhi();
   await setNewPinFlow();
-  await checkForAppUpdate();
   await savePhiEncrypted();
   await startAutosave();
   showToast("Ready for new client.");
@@ -527,6 +558,8 @@ async function resumeOrStartFlow() {
         return;
       }
 
+      await checkForUpdateBeforePin(document.getElementById("startupActions"));
+
       const pinResult = await startupPrompt({
         title: "Enter PIN",
         message: "Enter the session PIN to resume.",
@@ -540,7 +573,6 @@ async function resumeOrStartFlow() {
         await tryUnlockWithPin(pinResult.values[0]);
         startupFailedAttempts = 0;
         hideStartup();
-        await checkForAppUpdate();
         return;
       } catch (error) {
         if (isWrongPinError(error)) {
@@ -554,7 +586,7 @@ async function resumeOrStartFlow() {
               hideSecondary: true
             });
             await setNewPinFlow();
-            await checkForAppUpdate();
+          
             return;
           }
           const attemptsRemaining = MAX_PIN_ATTEMPTS - startupFailedAttempts;
@@ -569,14 +601,14 @@ async function resumeOrStartFlow() {
           hideSecondary: true
         });
         await setNewPinFlow();
-        await checkForAppUpdate();
+      
         return;
       }
     }
   }
 
   await setNewPinFlow();
-  await checkForAppUpdate();
+
 }
 
 async function lockSession() {
@@ -589,6 +621,7 @@ async function lockSession() {
   clearSessionKey();
   scrubPhiFromMemoryAndUi();
   unlockFailedAttempts = 0;
+
   ui.lockOverlay.classList.remove("hidden");
   ui.unlockPrompt.classList.add("hidden");
   ui.continueBtn.classList.remove("hidden");
@@ -606,7 +639,7 @@ async function unlockSession(pin) {
     ui.forgotPinWrap.classList.add("hidden");
     renderState();
     showToast("Session restored.");
-    await checkForAppUpdate();
+  
     updateInactivityTimer();
   } catch (error) {
     if (!isWrongPinError(error)) {
@@ -926,8 +959,9 @@ function bindSignatures() {
 function bindLockFlow() {
   ui.lockBtn.addEventListener("click", () => lockSession());
 
-  ui.continueBtn.addEventListener("click", () => {
+  ui.continueBtn.addEventListener("click", async () => {
     ui.continueBtn.classList.add("hidden");
+    await checkForUpdateBeforePin(ui.lockOverlay);
     ui.unlockPrompt.classList.remove("hidden");
     ui.unlockPin.focus();
   });
@@ -1067,6 +1101,5 @@ bootstrap().catch(async () => {
   await wipePhi();
   showToast("Data could not be restored. Starting over.");
   await setNewPinFlow();
-  await checkForAppUpdate();
   renderState();
 });
