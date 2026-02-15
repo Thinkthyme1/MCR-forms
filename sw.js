@@ -1,4 +1,4 @@
-/* manifest: app-v19 vendor-v1 */
+/* manifest: app-v20 vendor-v1 */
 const APP_PREFIX = "mcr-app-v";
 const VENDOR_PREFIX = "mcr-vendor-v";
 const MANIFEST_KEY = "__manifest__";
@@ -118,17 +118,10 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith((async () => {
-    // Check caches in deterministic order: current app first, then vendor
-    const manifest = await getStoredManifest();
-    if (manifest) {
-      const names = [
-        APP_PREFIX + manifest.appVersion,
-        VENDOR_PREFIX + manifest.vendorVersion
-      ];
-      for (const name of names) {
-        const hit = await (await caches.open(name)).match(event.request);
-        if (hit) return hit;
-      }
+    // Check all caches (vendor + app — only 2 entries)
+    for (const name of await caches.keys()) {
+      const hit = await (await caches.open(name)).match(event.request);
+      if (hit) return hit;
     }
     // Fallback to network — only cache valid responses
     try {

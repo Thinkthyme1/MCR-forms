@@ -361,6 +361,13 @@ async function checkForAppUpdate() {
 
   if (!activated) return;
 
+  // If the user already passed the PIN screen, defer the reload so they
+  // don't lose their place and have to re-enter the PIN.
+  if (window.__mcrSessionActive) {
+    window.__mcrUpdateReady = true;
+    showToast("Update ready — it will apply next session.");
+    return;
+  }
   window.location.reload();
 }
 
@@ -453,6 +460,7 @@ async function setNewPinFlow() {
     await setSalt(toBase64(pinSalt));
     await setPepper(pepper);
     hideStartup();
+    window.__mcrSessionActive = true;
     return;
   }
 }
@@ -540,6 +548,7 @@ async function resumeOrStartFlow() {
         await tryUnlockWithPin(pinResult.values[0]);
         startupFailedAttempts = 0;
         hideStartup();
+        window.__mcrSessionActive = true;
         await checkForAppUpdate();
         return;
       } catch (error) {
@@ -589,6 +598,14 @@ async function lockSession() {
   clearSessionKey();
   scrubPhiFromMemoryAndUi();
   unlockFailedAttempts = 0;
+
+  // Safe moment to apply a deferred SW update — data is saved and the
+  // user hasn't started typing again yet.
+  if (window.__mcrUpdateReady) {
+    window.location.reload();
+    return;
+  }
+
   ui.lockOverlay.classList.remove("hidden");
   ui.unlockPrompt.classList.add("hidden");
   ui.continueBtn.classList.remove("hidden");
