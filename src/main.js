@@ -591,7 +591,7 @@ async function savePdfBlob(blobOrBytes, filename) {
   showToast(`Downloaded ${filename}`);
 }
 
-function createPdfForActiveView() {
+async function createPdfForActiveView() {
   renderPrintDivs();
 
   /* Determine which print-ready div to show. */
@@ -600,14 +600,25 @@ function createPdfForActiveView() {
     : null;
   if (!printId) return;
 
+  const el = $(printId);
+
+  /* Wait for any signature images to finish decoding so they are
+     rasterised before the print snapshot is captured.  On slower
+     devices (Chromebooks) data-URL images may still be decoding
+     when window.print() fires, resulting in blank areas. */
+  const imgs = el.querySelectorAll("img[src]");
+  await Promise.all(
+    Array.from(imgs).map((img) => img.decode().catch(() => {}))
+  );
+
   /* Bring it on-screen, fire the browser print dialog, then hide it
      again.  The @media print rules in styles.css hide the app shell
      and show only the .printing div.
 
-     We must wait for the browser to repaint after the class change
-     before calling window.print(), otherwise the print snapshot may
-     capture the old layout (blank page). */
-  const el = $(printId);
+     A double-requestAnimationFrame guarantees one full paint cycle
+     has completed before window.print() captures the snapshot.
+     A single rAF fires *before* the paint, which is too early on
+     Chrome OS where the compositor is slower. */
   el.classList.add("printing");
 
   function cleanup() {
@@ -617,7 +628,9 @@ function createPdfForActiveView() {
   window.addEventListener("afterprint", cleanup);
 
   requestAnimationFrame(() => {
-    window.print();
+    requestAnimationFrame(() => {
+      window.print();
+    });
   });
 }
 
