@@ -108,8 +108,12 @@ export function startupPrompt({
   if (inputs[0]) inputs[0].focus();
 
   return new Promise((resolve) => {
-    primary.addEventListener("click", () => resolve({ action: "primary", values: inputs.map((i) => i.value), setError: (msg) => (error.textContent = msg) }));
+    const submit = () => resolve({ action: "primary", values: inputs.map((i) => i.value), setError: (msg) => (error.textContent = msg) });
+    primary.addEventListener("click", submit);
     secondary.addEventListener("click", () => resolve({ action: "secondary", values: [], setError: (msg) => (error.textContent = msg) }));
+    for (const input of inputs) {
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+    }
   });
 }
 
