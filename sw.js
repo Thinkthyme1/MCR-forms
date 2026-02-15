@@ -1,4 +1,4 @@
-const CACHE_NAME = "mcr-forms-cache-v3";
+const CACHE_NAME = "mcr-forms-cache-v4";
 const CRITICAL_ASSETS = [
   "./",
   "index.html",
