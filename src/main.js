@@ -324,6 +324,15 @@ function stopAutosave() {
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
+  /* Auto-reload when a new SW takes control (skipWaiting + clients.claim).
+     This ensures the page always runs the latest cached code without
+     requiring a manual refresh or waiting for a PIN entry. */
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
   const reg = await navigator.serviceWorker.register("sw.js", {
     updateViaCache: "none"
   });
