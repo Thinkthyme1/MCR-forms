@@ -31,18 +31,6 @@ import { $, hideStartup, setHoldToConfirm, showToast, startupPrompt } from "./ui
 import { buildFileName } from "./pdf.js";
 import { clientFullName, createEmptyRoi, createInitialState, getActiveRoi, hasPhi, staffFullName, upsertActiveRoi } from "./state.js";
 
-/* Auto-reload when a new SW takes control (skipWaiting + clients.claim).
-   Registered at module scope so the listener exists before the browser's
-   navigation-triggered SW update can complete. */
-if ("serviceWorker" in navigator) {
-  let reloading = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (reloading) return;
-    reloading = true;
-    window.location.reload();
-  });
-}
-
 let state = createInitialState();
 let sessionKey = null;
 let pinSalt = null;

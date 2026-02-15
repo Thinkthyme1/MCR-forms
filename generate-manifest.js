@@ -11,6 +11,7 @@ const APP_FILES = [
   "manifest.webmanifest",
   "assets/benchmark-logo.svg",
   "sw.js",
+  "src/sw-reload.js",
   "src/main.js",
   "src/constants.js",
   "src/state.js",
