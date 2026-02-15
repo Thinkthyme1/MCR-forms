@@ -1,9 +1,9 @@
 {
-  "appVersion": 21,
+  "appVersion": 22,
   "vendorVersion": 1,
   "app": {
     "files": {
-      "index.html": "f93496d98464",
+      "index.html": "502678f86ad2",
       "styles.css": "719a51b71e6a",
       "manifest.webmanifest": "a0e243095081",
       "assets/benchmark-logo.svg": "d56b1c14cdb2",
