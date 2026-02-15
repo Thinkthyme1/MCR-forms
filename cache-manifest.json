@@ -1,5 +1,5 @@
 {
-  "appVersion": 22,
+  "appVersion": 23,
   "vendorVersion": 1,
   "app": {
     "files": {
@@ -7,9 +7,9 @@
       "styles.css": "719a51b71e6a",
       "manifest.webmanifest": "a0e243095081",
       "assets/benchmark-logo.svg": "d56b1c14cdb2",
-      "sw.js": "ab8ef0b1fbe1",
+      "sw.js": "49ff02efca2c",
       "src/sw-reload.js": "3809606dd6b7",
-      "src/main.js": "a8873bf7ed6d",
+      "src/main.js": "cd3343b2152a",
       "src/constants.js": "dd173388fec4",
       "src/state.js": "fbca44091a0c",
       "src/db.js": "18cc30a4dfa3",

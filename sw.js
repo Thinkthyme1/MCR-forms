@@ -1,4 +1,4 @@
-/* manifest: app-v22 vendor-v1 */
+/* manifest: app-v23 vendor-v1 */
 const APP_PREFIX = "mcr-app-v";
 const VENDOR_PREFIX = "mcr-vendor-v";
 const MANIFEST_KEY = "__manifest__";
@@ -60,18 +60,22 @@ self.addEventListener("install", (event) => {
     const oldVendorHashes = oldManifest?.vendor?.files || {};
 
     // ── Vendor files (large, rarely change) ──
+    const vendorFetches = [];
     for (const [file, hash] of Object.entries(manifest.vendor.files)) {
       const url = resolve(file);
       if (oldVendorHashes[file] === hash && await copyEntry(oldVendor, vendorCache, url)) continue;
-      await vendorCache.add(url);
+      vendorFetches.push(vendorCache.add(url));
     }
+    await Promise.all(vendorFetches);
 
     // ── App files (small, change often) ──
+    const appFetches = [];
     for (const [file, hash] of Object.entries(manifest.app.files)) {
       const url = resolve(file);
       if (oldAppHashes[file] === hash && await copyEntry(oldApp, appCache, url)) continue;
-      await appCache.add(url);
+      appFetches.push(appCache.add(url));
     }
+    await Promise.all(appFetches);
 
     // Also cache "./" → index.html for root navigation
     const rootUrl = resolve("./");

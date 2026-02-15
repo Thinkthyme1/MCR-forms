@@ -372,25 +372,26 @@ async function checkForUpdateBeforePin(containerEl) {
   const pending = reg.installing || reg.waiting;
   if (!pending) { spinner.remove(); return; }
 
-  /* Wait for the new SW to finish activating (skipWaiting fires
-     immediately after install, so this is usually fast). */
-  const activated = await new Promise((resolve) => {
-    if (pending.state === "activated") { resolve(true); return; }
+  /* Wait up to 5s for the new SW to activate.  With parallel fetches
+     in the install handler this is usually <2s.  If it times out we
+     reload anyway — sw-reload.js will catch controllerchange and do
+     a second reload once the install finishes in the background. */
+  await new Promise((resolve) => {
+    if (pending.state === "activated") { resolve(); return; }
     const onStateChange = () => {
       if (pending.state === "activated" || pending.state === "redundant") {
         pending.removeEventListener("statechange", onStateChange);
-        resolve(pending.state === "activated");
+        resolve();
       }
     };
     pending.addEventListener("statechange", onStateChange);
-    setTimeout(() => resolve(false), 15000);
+    setTimeout(resolve, 5000);
   });
 
   spinner.remove();
 
-  if (!activated) return;
-
-  // Update landed — set flag so the reload doesn't loop, then reload.
+  // Update is either applied or in-flight — reload either way.
+  // The sessionStorage flag prevents an infinite loop on the next load.
   sessionStorage.setItem(UPDATE_CHECK_KEY, "1");
   window.location.reload();
 }
