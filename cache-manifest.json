@@ -1,0 +1,26 @@
+{
+  "appVersion": 1,
+  "vendorVersion": 1,
+  "app": {
+    "files": {
+      "index.html": "2d9dd3c5034b",
+      "styles.css": "2c485b6fa3b1",
+      "manifest.webmanifest": "a0e243095081",
+      "assets/benchmark-logo.svg": "d56b1c14cdb2",
+      "sw.js": "012ab63e8180",
+      "src/main.js": "1d17b7a15795",
+      "src/constants.js": "d45d0618edd0",
+      "src/state.js": "fbca44091a0c",
+      "src/db.js": "2b9277a0e718",
+      "src/crypto.js": "56d93966ba40",
+      "src/signature-pad.js": "5c53cff09817",
+      "src/pdf.js": "8cd65549544e",
+      "src/ui.js": "81397ed4dee5"
+    }
+  },
+  "vendor": {
+    "files": {
+      "vendor/html2pdf.bundle.min.js": "73b512869d64"
+    }
+  }
+}

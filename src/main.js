@@ -332,23 +332,31 @@ async function mirrorAsset(path, response) {
 }
 
 async function verifyCriticalAssets() {
-  /* Find the active SW cache by prefix so this doesn't go stale
-     when the cache version is bumped in sw.js. */
+  /* Check both vendor and app caches for all critical assets. */
   const keys = await caches.keys();
-  const cacheName = keys.find((k) => k.startsWith("mcr-forms-cache-"));
-  if (!cacheName) return;           // SW hasn't installed yet
-  const cache = await caches.open(cacheName);
+  const appCacheName = keys.find((k) => k.startsWith("mcr-app-v"));
+  const vendorCacheName = keys.find((k) => k.startsWith("mcr-vendor-v"));
+  if (!appCacheName) return;        // SW hasn't installed yet
+
+  const openCaches = [];
+  if (appCacheName) openCaches.push(await caches.open(appCacheName));
+  if (vendorCacheName) openCaches.push(await caches.open(vendorCacheName));
+
   let missingAny = false;
   for (const asset of CRITICAL_ASSETS) {
     const assetUrl = resolveAssetUrl(asset);
-    let fromCache = await cache.match(assetUrl);
+    let fromCache = null;
+    for (const c of openCaches) {
+      fromCache = await c.match(assetUrl);
+      if (fromCache) break;
+    }
     const inMirror = await hasAssetMirror(asset);
     if (!fromCache) {
       missingAny = true;
-      if (navigator.onLine) {
+      if (navigator.onLine && openCaches[0]) {
         try {
-          await cache.add(assetUrl);
-          fromCache = await cache.match(assetUrl);
+          await openCaches[0].add(assetUrl);
+          fromCache = await openCaches[0].match(assetUrl);
         } catch {
           // Keep warning behavior below if recache is not possible.
         }

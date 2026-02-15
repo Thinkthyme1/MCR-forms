@@ -10,6 +10,7 @@ export const CRITICAL_ASSETS = [
   "index.html",
   "styles.css",
   "manifest.webmanifest",
+  "cache-manifest.json",
   "assets/benchmark-logo.svg",
   "vendor/html2pdf.bundle.min.js",
   "sw.js",
