@@ -310,7 +310,13 @@ function stopAutosave() {
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  await navigator.serviceWorker.register("sw.js");
+  const reg = await navigator.serviceWorker.register("sw.js", {
+    updateViaCache: "none"
+  });
+  /* Proactively check for an updated sw.js every time the page loads.
+     This ensures cache-busting even on devices (Chromebooks) where
+     DevTools is unavailable for manual SW unregistration. */
+  reg.update().catch(() => {});
 }
 
 function resolveAssetUrl(path) {
@@ -324,7 +330,12 @@ async function mirrorAsset(path, response) {
 }
 
 async function verifyCriticalAssets() {
-  const cache = await caches.open("mcr-forms-cache-v2");
+  /* Find the active SW cache by prefix so this doesn't go stale
+     when the cache version is bumped in sw.js. */
+  const keys = await caches.keys();
+  const cacheName = keys.find((k) => k.startsWith("mcr-forms-cache-"));
+  if (!cacheName) return;           // SW hasn't installed yet
+  const cache = await caches.open(cacheName);
   let missingAny = false;
   for (const asset of CRITICAL_ASSETS) {
     const assetUrl = resolveAssetUrl(asset);
@@ -591,7 +602,7 @@ async function savePdfBlob(blobOrBytes, filename) {
   showToast(`Downloaded ${filename}`);
 }
 
-function createPdfForActiveView() {
+async function createPdfForActiveView() {
   renderPrintDivs();
 
   /* Determine which print-ready div to show. */
@@ -600,14 +611,25 @@ function createPdfForActiveView() {
     : null;
   if (!printId) return;
 
+  const el = $(printId);
+
+  /* Wait for any signature images to finish decoding so they are
+     rasterised before the print snapshot is captured.  On slower
+     devices (Chromebooks) data-URL images may still be decoding
+     when window.print() fires, resulting in blank areas. */
+  const imgs = el.querySelectorAll("img[src]");
+  await Promise.all(
+    Array.from(imgs).map((img) => img.decode().catch(() => {}))
+  );
+
   /* Bring it on-screen, fire the browser print dialog, then hide it
      again.  The @media print rules in styles.css hide the app shell
      and show only the .printing div.
 
-     We must wait for the browser to repaint after the class change
-     before calling window.print(), otherwise the print snapshot may
-     capture the old layout (blank page). */
-  const el = $(printId);
+     A double-requestAnimationFrame guarantees one full paint cycle
+     has completed before window.print() captures the snapshot.
+     A single rAF fires *before* the paint, which is too early on
+     Chrome OS where the compositor is slower. */
   el.classList.add("printing");
 
   function cleanup() {
@@ -617,7 +639,9 @@ function createPdfForActiveView() {
   window.addEventListener("afterprint", cleanup);
 
   requestAnimationFrame(() => {
-    window.print();
+    requestAnimationFrame(() => {
+      window.print();
+    });
   });
 }
 
