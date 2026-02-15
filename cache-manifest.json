@@ -1,10 +1,10 @@
 {
-  "appVersion": 18,
+  "appVersion": 19,
   "vendorVersion": 1,
   "app": {
     "files": {
-      "index.html": "ff27f3488221",
-      "styles.css": "31d2052c89cd",
+      "index.html": "f93496d98464",
+      "styles.css": "25d4697f04ce",
       "manifest.webmanifest": "a0e243095081",
       "assets/benchmark-logo.svg": "d56b1c14cdb2",
       "sw.js": "1411b3eef742",
@@ -16,7 +16,7 @@
       "src/crypto.js": "0a22bd2e3313",
       "src/signature-pad.js": "5c53cff09817",
       "src/pdf.js": "8cd65549544e",
-      "src/ui.js": "beb9f6544338"
+      "src/ui.js": "19c3354a332b"
     }
   },
   "vendor": {
