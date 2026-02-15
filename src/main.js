@@ -1,4 +1,5 @@
 import {
+  APP_VERSION,
   AUTO_SAVE_MS,
   CRITICAL_ASSETS,
   HOLD_CONFIRM_MS,
@@ -71,7 +72,8 @@ const ui = {
   forgotProgress: $("forgotProgress"),
   dirPickerWrap: $("dirPickerWrap"),
   pickFolderBtn: $("pickFolderBtn"),
-  folderStatus: $("folderStatus")
+  folderStatus: $("folderStatus"),
+  appVersionLabel: $("appVersionLabel")
 };
 
 const fields = {
@@ -1021,6 +1023,7 @@ function blockIfEmbeddedFrame() {
 
 async function bootstrap() {
   blockIfEmbeddedFrame();
+  ui.appVersionLabel.textContent = `v${APP_VERSION}`;
   ui.noticeLegal1.textContent = NOTICE_SECTIONS[0].text;
   ui.noticeLegal2.textContent = NOTICE_SECTIONS[1].text;
   ui.noticeLegal3.textContent = NOTICE_SECTIONS[2].text;
