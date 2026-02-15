@@ -13,9 +13,10 @@ node generate-manifest.js
 This will:
 1. Hash all critical assets and detect changes
 2. Auto-bump `appVersion` (app files) and/or `vendorVersion` (html2pdf) in `cache-manifest.json`
-3. Stamp `sw.js` line 1 with the new version fingerprint so the browser detects the update
+3. Auto-bump `APP_VERSION` patch number in `src/constants.js` when app files change (e.g. `1.0.3` → `1.0.4`)
+4. Stamp `sw.js` line 1 with the new version fingerprint so the browser detects the update
 
-Also bump `APP_VERSION` in `src/constants.js` for user-visible version tracking.
+Do NOT manually edit `APP_VERSION` in `src/constants.js` — it is auto-bumped by the manifest generator.
 
 Do NOT edit `cache-manifest.json` or the `sw.js` stamp comment manually.
 
@@ -48,7 +49,7 @@ Vanilla JS SPA. No bundler, no framework, no build step (except the manifest gen
 
 Two caches: `mcr-app-vN` (small app files, ~84KB) and `mcr-vendor-vN` (html2pdf, ~906KB). On install, the SW fetches `cache-manifest.json` and only downloads files whose hashes changed since the previous version. The vendor cache survives app cache bumps.
 
-The app checks for SW updates on every PIN entry (new session or resume). If a new version installed, the user is prompted to reload.
+The app checks for SW updates on every PIN entry (new session or resume). If a new version activates, the page silently reloads.
 
 ## ROI instances
 
