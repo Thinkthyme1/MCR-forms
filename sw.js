@@ -1,3 +1,4 @@
+/* manifest: app-v6 vendor-v1 */
 const APP_PREFIX = "mcr-app-v";
 const VENDOR_PREFIX = "mcr-vendor-v";
 const MANIFEST_KEY = "__manifest__";
