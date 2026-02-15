@@ -1,5 +1,5 @@
 {
-  "appVersion": 17,
+  "appVersion": 18,
   "vendorVersion": 1,
   "app": {
     "files": {
@@ -9,7 +9,7 @@
       "assets/benchmark-logo.svg": "d56b1c14cdb2",
       "sw.js": "1411b3eef742",
       "src/sw-reload.js": "3809606dd6b7",
-      "src/main.js": "a43ee96ee1fb",
+      "src/main.js": "341eafcaafa0",
       "src/constants.js": "dd173388fec4",
       "src/state.js": "fbca44091a0c",
       "src/db.js": "18cc30a4dfa3",
