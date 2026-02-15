@@ -22,7 +22,9 @@ const APP_FILES = [
 ];
 
 function hash(filePath) {
-  const content = fs.readFileSync(path.resolve(__dirname, filePath));
+  let content = fs.readFileSync(path.resolve(__dirname, filePath), "utf8");
+  // Strip the version stamp from sw.js so it doesn't affect its own hash
+  if (filePath === "sw.js") content = content.replace(/^\/\* manifest:.*\*\/\n/, "");
   return crypto.createHash("sha256").update(content).digest("hex").slice(0, 12);
 }
 
@@ -65,6 +67,14 @@ fs.writeFileSync(
   path.resolve(__dirname, "cache-manifest.json"),
   JSON.stringify(manifest, null, 2) + "\n"
 );
+
+// Stamp sw.js with the version fingerprint so the browser detects
+// any file change as a sw.js byte change → triggers SW update.
+const swPath = path.resolve(__dirname, "sw.js");
+const swSrc = fs.readFileSync(swPath, "utf8");
+const stamp = `/* manifest: app-v${appVersion} vendor-v${vendorVersion} */`;
+const stamped = swSrc.replace(/^(\/\* manifest:.*\*\/\n)?/, stamp + "\n");
+fs.writeFileSync(swPath, stamped);
 
 console.log(
   `cache-manifest.json — app: v${appVersion}${appChanged ? " (changed)" : ""}, vendor: v${vendorVersion}${vendorChanged ? " (changed)" : ""}`
