@@ -690,9 +690,8 @@ input, textarea, select {
    PRINT – hide everything except the active .print-ready div
    ============================================================ */
 @media print {
-  /* Hide the entire app shell */
-  .app, .top-panel, .main-content, .toast, .modal-screen,
-  .lock-overlay, .warning { display: none !important; }
+  /* Hide all children of .app except the active print div */
+  .app > *:not(.printing) { display: none !important; }
 
   /* Show only the print-ready div that has the .printing class */
   .print-ready.printing {
@@ -705,5 +704,5 @@ input, textarea, select {
   }
 
   @page { size: letter portrait; margin: 0.4in; }
-  body { margin: 0; background: #fff; }
+  body { margin: 0; padding: 0; background: #fff; }
 }
