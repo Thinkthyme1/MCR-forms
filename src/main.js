@@ -256,6 +256,13 @@ function renderState() {
     roiSigPad.fromDataUrl(roi.signature);
     roiParentSigPad.fromDataUrl(roi.parentSignature || "");
     noticeSigPad.fromDataUrl(state.notice.signature);
+
+    if (roi.sigLocked) { roiSigPad.lock(); ui.lockRoiSigBtn.textContent = "Unlock"; }
+    else { roiSigPad.unlock(); ui.lockRoiSigBtn.textContent = "Lock"; }
+    if (roi.parentSigLocked) { roiParentSigPad.lock(); ui.lockRoiParentSigBtn.textContent = "Unlock"; }
+    else { roiParentSigPad.unlock(); ui.lockRoiParentSigBtn.textContent = "Lock"; }
+    if (state.notice.sigLocked) { noticeSigPad.lock(); ui.lockNoticeSigBtn.textContent = "Unlock"; }
+    else { noticeSigPad.unlock(); ui.lockNoticeSigBtn.textContent = "Lock"; }
   }
 }
 
@@ -902,7 +909,7 @@ function bindSignatures() {
     markChanged();
   });
 
-  function bindSigLock(btn, pad) {
+  function bindSigLock(btn, pad, onToggle) {
     btn.addEventListener("click", () => {
       if (pad.isLocked()) {
         pad.unlock();
@@ -911,11 +918,13 @@ function bindSignatures() {
         pad.lock();
         btn.textContent = "Unlock";
       }
+      onToggle(pad.isLocked());
+      markChanged();
     });
   }
-  bindSigLock(ui.lockRoiSigBtn, roiSigPad);
-  bindSigLock(ui.lockRoiParentSigBtn, roiParentSigPad);
-  bindSigLock(ui.lockNoticeSigBtn, noticeSigPad);
+  bindSigLock(ui.lockRoiSigBtn, roiSigPad, (v) => upsertActiveRoi(state, { sigLocked: v }));
+  bindSigLock(ui.lockRoiParentSigBtn, roiParentSigPad, (v) => upsertActiveRoi(state, { parentSigLocked: v }));
+  bindSigLock(ui.lockNoticeSigBtn, noticeSigPad, (v) => { state.notice.sigLocked = v; });
 }
 
 function bindLockFlow() {
