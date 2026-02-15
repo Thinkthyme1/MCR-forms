@@ -172,7 +172,16 @@ input, textarea, select {
   touch-action: none;
 }
 
-.signature-actions { display: flex; justify-content: flex-end; }
+.signature-actions { display: flex; justify-content: flex-end; gap: 0.4rem; align-items: center; }
+.sig-lock-btn {
+  border: 1px solid #d97706;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 0.4rem;
+  padding: 0.38rem 0.66rem;
+  font-weight: 600;
+  cursor: pointer;
+}
 .signature-meta-row {
   justify-content: space-between;
   align-items: center;
