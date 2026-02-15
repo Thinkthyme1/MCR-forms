@@ -130,7 +130,7 @@ button.danger:hover { background: var(--danger-dark); }
 .hold-progress.active { opacity: 1; }
 
 .main-content { padding: 1rem; max-width: 980px; margin: 0 auto; }
-.view { display: grid; gap: 0.75rem; }
+.view { display: grid; gap: 0.75rem; position: relative; }
 .view.hidden, .hidden { display: none !important; }
 
 .view h2 { margin: 0.2rem 0 0.4rem; }
@@ -473,6 +473,7 @@ input, textarea, select {
 
 .muted { color: var(--muted); font-size: 0.9rem; }
 .error { color: #b91c1c; min-height: 1.2rem; }
+.app-version-label { position: absolute; bottom: 0.5rem; right: 0.75rem; font-size: 0.7rem; color: var(--muted); opacity: 0.6; margin: 0; pointer-events: none; }
 
 .lock-overlay {
   position: fixed;

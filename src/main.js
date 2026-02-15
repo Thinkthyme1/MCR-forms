@@ -1,4 +1,5 @@
 import {
+  APP_VERSION,
   AUTO_SAVE_MS,
   CRITICAL_ASSETS,
   HOLD_CONFIRM_MS,
@@ -71,7 +72,8 @@ const ui = {
   forgotProgress: $("forgotProgress"),
   dirPickerWrap: $("dirPickerWrap"),
   pickFolderBtn: $("pickFolderBtn"),
-  folderStatus: $("folderStatus")
+  folderStatus: $("folderStatus"),
+  appVersionLabel: $("appVersionLabel")
 };
 
 const fields = {
@@ -359,15 +361,7 @@ async function checkForAppUpdate() {
 
   if (!activated) return;
 
-  const result = await startupPrompt({
-    title: "App Updated",
-    message: "A new version was installed. Reload to use it?",
-    primaryLabel: "Reload Now",
-    secondaryLabel: "Later"
-  });
-  if (result.action === "primary") {
-    window.location.reload();
-  }
+  window.location.reload();
 }
 
 function resolveAssetUrl(path) {
@@ -546,6 +540,7 @@ async function resumeOrStartFlow() {
         await tryUnlockWithPin(pinResult.values[0]);
         startupFailedAttempts = 0;
         hideStartup();
+        await checkForAppUpdate();
         return;
       } catch (error) {
         if (isWrongPinError(error)) {
@@ -611,6 +606,7 @@ async function unlockSession(pin) {
     ui.forgotPinWrap.classList.add("hidden");
     renderState();
     showToast("Session restored.");
+    await checkForAppUpdate();
     updateInactivityTimer();
   } catch (error) {
     if (!isWrongPinError(error)) {
@@ -1027,6 +1023,7 @@ function blockIfEmbeddedFrame() {
 
 async function bootstrap() {
   blockIfEmbeddedFrame();
+  ui.appVersionLabel.textContent = `v${APP_VERSION}`;
   ui.noticeLegal1.textContent = NOTICE_SECTIONS[0].text;
   ui.noticeLegal2.textContent = NOTICE_SECTIONS[1].text;
   ui.noticeLegal3.textContent = NOTICE_SECTIONS[2].text;
