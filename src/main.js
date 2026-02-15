@@ -52,7 +52,7 @@ const ui = {
   addRoiBtn: $("addRoiBtn"),
   clearRoiSigBtn: $("clearRoiSigBtn"),
   clearRoiParentSigBtn: $("clearRoiParentSigBtn"),
-  clearStaffSigBtn: $("clearStaffSigBtn"),
+
   clearNoticeSigBtn: $("clearNoticeSigBtn"),
   lockOverlay: $("lockOverlay"),
   continueBtn: $("continueBtn"),
@@ -108,7 +108,7 @@ const fields = {
 
 let roiSigPad;
 let roiParentSigPad;
-let staffSigPad;
+
 let noticeSigPad;
 
 function clone(obj) {
@@ -247,10 +247,9 @@ function renderState() {
   renderPrintDivs();
   renderView();
 
-  if (roiSigPad && roiParentSigPad && staffSigPad && noticeSigPad) {
+  if (roiSigPad && roiParentSigPad && noticeSigPad) {
     roiSigPad.fromDataUrl(roi.signature);
     roiParentSigPad.fromDataUrl(roi.parentSignature || "");
-    staffSigPad.fromDataUrl(state.staff.signature || "");
     noticeSigPad.fromDataUrl(state.notice.signature);
   }
 }
@@ -814,12 +813,6 @@ function bindSignatures() {
     upsertActiveRoi(state, { parentSignature: value });
     markChanged();
   });
-  staffSigPad = attachSignaturePad($("staffSignature"), async () => {
-    state.staff.signature = staffSigPad.isBlank() ? "" : staffSigPad.toDataUrl();
-    renderState();
-    await saveStaffOnly();
-  });
-
   noticeSigPad = attachSignaturePad($("noticeSignature"), () => {
     state.notice.signature = noticeSigPad.isBlank() ? "" : noticeSigPad.toDataUrl();
     markChanged();
@@ -835,13 +828,6 @@ function bindSignatures() {
     upsertActiveRoi(state, { parentSignature: "" });
     markChanged();
   });
-  ui.clearStaffSigBtn.addEventListener("click", async () => {
-    staffSigPad.clear();
-    state.staff.signature = "";
-    renderState();
-    await saveStaffOnly();
-  });
-
   ui.clearNoticeSigBtn.addEventListener("click", () => {
     noticeSigPad.clear();
     state.notice.signature = "";
