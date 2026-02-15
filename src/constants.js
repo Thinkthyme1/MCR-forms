@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.5";
+export const APP_VERSION = "1.0.6";
 export const PBKDF2_ITERATIONS = 600000;
 export const AUTO_SAVE_MS = 30000;
 export const INACTIVITY_LOCK_MS = 30 * 60 * 1000;
@@ -14,6 +14,7 @@ export const CRITICAL_ASSETS = [
   "assets/benchmark-logo.svg",
   "vendor/html2pdf.bundle.min.js",
   "sw.js",
+  "src/sw-reload.js",
   "src/main.js",
   "src/constants.js",
   "src/state.js",
