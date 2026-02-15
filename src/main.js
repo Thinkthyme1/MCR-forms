@@ -546,6 +546,7 @@ async function resumeOrStartFlow() {
         await tryUnlockWithPin(pinResult.values[0]);
         startupFailedAttempts = 0;
         hideStartup();
+        await checkForAppUpdate();
         return;
       } catch (error) {
         if (isWrongPinError(error)) {
@@ -611,6 +612,7 @@ async function unlockSession(pin) {
     ui.forgotPinWrap.classList.add("hidden");
     renderState();
     showToast("Session restored.");
+    await checkForAppUpdate();
     updateInactivityTimer();
   } catch (error) {
     if (!isWrongPinError(error)) {
