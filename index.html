@@ -203,6 +203,7 @@
             <h3>Signature of Individual/Consumer/Patient/Applicant</h3>
             <canvas id="roiSignature" class="signature-pad" width="640" height="180"></canvas>
             <div class="signature-actions signature-meta-row">
+              <button id="lockRoiSigBtn" class="sig-lock-btn" type="button">Lock</button>
               <button id="clearRoiSigBtn" class="roi-action-btn" type="button">Clear Signature</button>
               <p>Print Name: <span id="roiClientPrintedName"></span></p>
               <p>Date: <span id="roiClientDate"></span></p>
@@ -211,6 +212,7 @@
             <h3>Signature of Parent or Other Legally Authorized Representative (where applicable)</h3>
             <canvas id="roiParentSignature" class="signature-pad" width="640" height="180"></canvas>
             <div class="signature-actions signature-meta-row">
+              <button id="lockRoiParentSigBtn" class="sig-lock-btn" type="button">Lock</button>
               <button id="clearRoiParentSigBtn" class="roi-action-btn" type="button">Clear Parent/Representative Signature</button>
               <label class="roi-inline-box">Parent/Guardian/Custodian
                 <input id="roiParentPrintedName" type="text" autocomplete="off" />
@@ -243,6 +245,7 @@
             <h3>Client Signature</h3>
             <canvas id="noticeSignature" class="signature-pad" width="640" height="180"></canvas>
             <div class="signature-actions">
+              <button id="lockNoticeSigBtn" class="sig-lock-btn" type="button">Lock</button>
               <button id="clearNoticeSigBtn" type="button">Clear Signature</button>
             </div>
             <div class="date-time-row">

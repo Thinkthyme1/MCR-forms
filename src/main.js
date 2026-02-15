@@ -52,8 +52,10 @@ const ui = {
   addRoiBtn: $("addRoiBtn"),
   clearRoiSigBtn: $("clearRoiSigBtn"),
   clearRoiParentSigBtn: $("clearRoiParentSigBtn"),
-
+  lockRoiSigBtn: $("lockRoiSigBtn"),
+  lockRoiParentSigBtn: $("lockRoiParentSigBtn"),
   clearNoticeSigBtn: $("clearNoticeSigBtn"),
+  lockNoticeSigBtn: $("lockNoticeSigBtn"),
   lockOverlay: $("lockOverlay"),
   continueBtn: $("continueBtn"),
   unlockPrompt: $("unlockPrompt"),
@@ -819,20 +821,38 @@ function bindSignatures() {
   });
 
   ui.clearRoiSigBtn.addEventListener("click", () => {
+    if (roiSigPad.isLocked()) return;
     roiSigPad.clear();
     upsertActiveRoi(state, { signature: "" });
     markChanged();
   });
   ui.clearRoiParentSigBtn.addEventListener("click", () => {
+    if (roiParentSigPad.isLocked()) return;
     roiParentSigPad.clear();
     upsertActiveRoi(state, { parentSignature: "" });
     markChanged();
   });
   ui.clearNoticeSigBtn.addEventListener("click", () => {
+    if (noticeSigPad.isLocked()) return;
     noticeSigPad.clear();
     state.notice.signature = "";
     markChanged();
   });
+
+  function bindSigLock(btn, pad) {
+    btn.addEventListener("click", () => {
+      if (pad.isLocked()) {
+        pad.unlock();
+        btn.textContent = "Lock";
+      } else {
+        pad.lock();
+        btn.textContent = "Unlock";
+      }
+    });
+  }
+  bindSigLock(ui.lockRoiSigBtn, roiSigPad);
+  bindSigLock(ui.lockRoiParentSigBtn, roiParentSigPad);
+  bindSigLock(ui.lockNoticeSigBtn, noticeSigPad);
 }
 
 function bindLockFlow() {

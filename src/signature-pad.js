@@ -7,6 +7,7 @@ export function attachSignaturePad(canvas, onChange) {
   ctx.lineCap = "round";
 
   let drawing = false;
+  let locked = false;
 
   const point = (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -18,6 +19,7 @@ export function attachSignaturePad(canvas, onChange) {
   };
 
   const start = (e) => {
+    if (locked) return;
     e.preventDefault();
     drawing = true;
     const p = point(e);
@@ -26,7 +28,7 @@ export function attachSignaturePad(canvas, onChange) {
   };
 
   const move = (e) => {
-    if (!drawing) return;
+    if (!drawing || locked) return;
     e.preventDefault();
     const p = point(e);
     ctx.lineTo(p.x, p.y);
@@ -61,6 +63,19 @@ export function attachSignaturePad(canvas, onChange) {
     },
     toDataUrl() {
       return canvas.toDataURL("image/png");
+    },
+    lock() {
+      locked = true;
+      canvas.style.touchAction = "auto";
+      canvas.style.opacity = "0.6";
+    },
+    unlock() {
+      locked = false;
+      canvas.style.touchAction = "none";
+      canvas.style.opacity = "1";
+    },
+    isLocked() {
+      return locked;
     },
     fromDataUrl(dataUrl) {
       if (!dataUrl) {
