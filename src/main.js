@@ -24,6 +24,7 @@ import {
 import { decryptJson, deriveAesKey, encryptJson, generateSalt, toBase64, fromBase64 } from "./crypto.js";
 import { attachSignaturePad } from "./signature-pad.js";
 import { $, hideStartup, setHoldToConfirm, showToast, startupPrompt } from "./ui.js";
+import { buildFileName } from "./pdf.js";
 import { clientFullName, createEmptyRoi, createInitialState, getActiveRoi, hasPhi, staffFullName, upsertActiveRoi } from "./state.js";
 
 let state = createInitialState();
@@ -605,7 +606,6 @@ async function savePdfBlob(blobOrBytes, filename) {
 async function createPdfForActiveView() {
   renderPrintDivs();
 
-  /* Determine which print-ready div to show. */
   const printId = state.currentView === "roi" ? "printRoi"
     : state.currentView === "notice" ? "printNotice"
     : null;
@@ -613,36 +613,37 @@ async function createPdfForActiveView() {
 
   const el = $(printId);
 
-  /* Wait for any signature images to finish decoding so they are
-     rasterised before the print snapshot is captured.  On slower
-     devices (Chromebooks) data-URL images may still be decoding
-     when window.print() fires, resulting in blank areas. */
+  /* Move on-screen so html2canvas can measure and render it. */
+  el.classList.add("printing");
+
+  /* Wait for any signature images to finish decoding. */
   const imgs = el.querySelectorAll("img[src]");
   await Promise.all(
     Array.from(imgs).map((img) => img.decode().catch(() => {}))
   );
 
-  /* Bring it on-screen, fire the browser print dialog, then hide it
-     again.  The @media print rules in styles.css hide the app shell
-     and show only the .printing div.
+  const formType = state.currentView === "roi" ? "ROI" : "Notice";
+  const filename = buildFileName(formType, state.general);
 
-     A double-requestAnimationFrame guarantees one full paint cycle
-     has completed before window.print() captures the snapshot.
-     A single rAF fires *before* the paint, which is too early on
-     Chrome OS where the compositor is slower. */
-  el.classList.add("printing");
+  try {
+    /* Generate a real PDF via html2pdf (html2canvas + jsPDF).
+       This bypasses window.print() / Chrome print preview entirely,
+       which is unreliable on Chrome OS Chromebooks. */
+    const blob = await html2pdf()
+      .set({
+        margin: [0.4, 0.4, 0.4, 0.4],
+        filename,
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+      })
+      .from(el)
+      .outputPdf("blob");
 
-  function cleanup() {
+    await savePdfBlob(blob, filename);
+  } finally {
     el.classList.remove("printing");
-    window.removeEventListener("afterprint", cleanup);
   }
-  window.addEventListener("afterprint", cleanup);
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      window.print();
-    });
-  });
 }
 
 function bindFieldInputs() {
