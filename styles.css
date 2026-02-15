@@ -345,12 +345,7 @@ input, textarea, select {
 .roi-duration-option .radio-filled {
   margin-top: 0.16rem;
 }
-.roi-staff-signature-wrap {
-  border: 1px solid var(--border);
-  border-radius: 0.45rem;
-  padding: 0.45rem;
-  background: #fff;
-}
+
 .signature-pad-wrap {
   position: relative;
 }
