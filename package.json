@@ -7,9 +7,6 @@
     "start": "npx serve -s . -l 5173",
     "audit": "npm audit --omit=dev"
   },
-  "dependencies": {
-    "html2pdf.js": "^0.10.2"
-  },
   "devDependencies": {
     "serve": "14.2.4"
   }

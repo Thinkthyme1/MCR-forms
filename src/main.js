@@ -332,23 +332,31 @@ async function mirrorAsset(path, response) {
 }
 
 async function verifyCriticalAssets() {
-  /* Find the active SW cache by prefix so this doesn't go stale
-     when the cache version is bumped in sw.js. */
+  /* Check both vendor and app caches for all critical assets. */
   const keys = await caches.keys();
-  const cacheName = keys.find((k) => k.startsWith("mcr-forms-cache-"));
-  if (!cacheName) return;           // SW hasn't installed yet
-  const cache = await caches.open(cacheName);
+  const appCacheName = keys.find((k) => k.startsWith("mcr-app-v"));
+  const vendorCacheName = keys.find((k) => k.startsWith("mcr-vendor-v"));
+  if (!appCacheName) return;        // SW hasn't installed yet
+
+  const openCaches = [];
+  if (appCacheName) openCaches.push(await caches.open(appCacheName));
+  if (vendorCacheName) openCaches.push(await caches.open(vendorCacheName));
+
   let missingAny = false;
   for (const asset of CRITICAL_ASSETS) {
     const assetUrl = resolveAssetUrl(asset);
-    let fromCache = await cache.match(assetUrl);
+    let fromCache = null;
+    for (const c of openCaches) {
+      fromCache = await c.match(assetUrl);
+      if (fromCache) break;
+    }
     const inMirror = await hasAssetMirror(asset);
     if (!fromCache) {
       missingAny = true;
-      if (navigator.onLine) {
+      if (navigator.onLine && openCaches[0]) {
         try {
-          await cache.add(assetUrl);
-          fromCache = await cache.match(assetUrl);
+          await openCaches[0].add(assetUrl);
+          fromCache = await openCaches[0].match(assetUrl);
         } catch {
           // Keep warning behavior below if recache is not possible.
         }
@@ -599,8 +607,9 @@ async function savePdfBlob(blobOrBytes, filename) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = filename;
+  const objectUrl = link.href;
   link.click();
-  URL.revokeObjectURL(link.href);
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
   showToast(`Downloaded ${filename}`);
 }
 
@@ -939,7 +948,17 @@ function blockIfEmbeddedFrame() {
     isEmbedded = true;
   }
   if (!isEmbedded) return;
-  document.body.innerHTML = `<main style="font-family: Segoe UI, Tahoma, sans-serif; padding: 2rem; color: #111827; background: #f3f4f6; min-height: 100vh;"><h1 style="margin-top: 0;">Blocked</h1><p>This app cannot run inside an embedded frame.</p></main>`;
+  document.body.textContent = "";
+  const m = document.createElement("main");
+  m.style.cssText = "font-family: Segoe UI, Tahoma, sans-serif; padding: 2rem; color: #111827; background: #f3f4f6; min-height: 100vh;";
+  const h = document.createElement("h1");
+  h.style.marginTop = "0";
+  h.textContent = "Blocked";
+  const p = document.createElement("p");
+  p.textContent = "This app cannot run inside an embedded frame.";
+  m.appendChild(h);
+  m.appendChild(p);
+  document.body.appendChild(m);
   throw new Error("Blocked embedded frame context");
 }
 
