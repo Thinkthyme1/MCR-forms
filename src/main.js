@@ -359,15 +359,7 @@ async function checkForAppUpdate() {
 
   if (!activated) return;
 
-  const result = await startupPrompt({
-    title: "App Updated",
-    message: "A new version was installed. Reload to use it?",
-    primaryLabel: "Reload Now",
-    secondaryLabel: "Later"
-  });
-  if (result.action === "primary") {
-    window.location.reload();
-  }
+  window.location.reload();
 }
 
 function resolveAssetUrl(path) {
