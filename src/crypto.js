@@ -25,12 +25,21 @@ export function fromBase64(value) {
   return out;
 }
 
-export async function deriveAesKey(pin, saltBytes) {
+export function generatePepper() {
+  const pepper = new Uint8Array(32);
+  crypto.getRandomValues(pepper);
+  return pepper;
+}
+
+export async function deriveAesKey(pin, saltBytes, pepperBytes) {
+  const combinedSalt = pepperBytes
+    ? new Uint8Array([...saltBytes, ...pepperBytes])
+    : saltBytes;
   const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(pin), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: saltBytes,
+      salt: combinedSalt,
       iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256"
     },

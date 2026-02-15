@@ -7,8 +7,10 @@ import {
   NOTICE_SECTIONS
 } from "./constants.js";
 import {
+  deletePepper,
   deleteSalt,
   getDefaultDirHandle,
+  getPepper,
   getSalt,
   getSessionBlob,
   getStaffInfo,
@@ -16,12 +18,13 @@ import {
   overwriteAndDelete,
   setAssetMirror,
   setDefaultDirHandle,
+  setPepper,
   setSalt,
   setSessionBlob,
   setStaffInfo,
   STORES
 } from "./db.js";
-import { decryptJson, deriveAesKey, encryptJson, generateSalt, toBase64, fromBase64 } from "./crypto.js";
+import { decryptJson, deriveAesKey, encryptJson, generatePepper, generateSalt, toBase64, fromBase64 } from "./crypto.js";
 import { attachSignaturePad } from "./signature-pad.js";
 import { $, hideStartup, setHoldToConfirm, showToast, startupPrompt } from "./ui.js";
 import { buildFileName } from "./pdf.js";
@@ -253,6 +256,13 @@ function renderState() {
     roiSigPad.fromDataUrl(roi.signature);
     roiParentSigPad.fromDataUrl(roi.parentSignature || "");
     noticeSigPad.fromDataUrl(state.notice.signature);
+
+    if (roi.sigLocked) { roiSigPad.lock(); ui.lockRoiSigBtn.textContent = "Unlock"; }
+    else { roiSigPad.unlock(); ui.lockRoiSigBtn.textContent = "Lock"; }
+    if (roi.parentSigLocked) { roiParentSigPad.lock(); ui.lockRoiParentSigBtn.textContent = "Unlock"; }
+    else { roiParentSigPad.unlock(); ui.lockRoiParentSigBtn.textContent = "Lock"; }
+    if (state.notice.sigLocked) { noticeSigPad.lock(); ui.lockNoticeSigBtn.textContent = "Unlock"; }
+    else { noticeSigPad.unlock(); ui.lockNoticeSigBtn.textContent = "Lock"; }
   }
 }
 
@@ -319,6 +329,45 @@ async function registerServiceWorker() {
      This ensures cache-busting even on devices (Chromebooks) where
      DevTools is unavailable for manual SW unregistration. */
   reg.update().catch(() => {});
+}
+
+async function checkForAppUpdate() {
+  if (!navigator.onLine || !("serviceWorker" in navigator)) return;
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) return;
+
+  try {
+    await reg.update();
+  } catch { return; }
+
+  const pending = reg.installing || reg.waiting;
+  if (!pending) return;
+
+  /* Wait for the new SW to finish activating (skipWaiting fires
+     immediately after install, so this is usually fast). */
+  const activated = await new Promise((resolve) => {
+    if (pending.state === "activated") { resolve(true); return; }
+    const onStateChange = () => {
+      if (pending.state === "activated" || pending.state === "redundant") {
+        pending.removeEventListener("statechange", onStateChange);
+        resolve(pending.state === "activated");
+      }
+    };
+    pending.addEventListener("statechange", onStateChange);
+    setTimeout(() => resolve(false), 15000);
+  });
+
+  if (!activated) return;
+
+  const result = await startupPrompt({
+    title: "App Updated",
+    message: "A new version was installed. Reload to use it?",
+    primaryLabel: "Reload Now",
+    secondaryLabel: "Later"
+  });
+  if (result.action === "primary") {
+    window.location.reload();
+  }
 }
 
 function resolveAssetUrl(path) {
@@ -405,8 +454,10 @@ async function setNewPinFlow() {
     }
 
     pinSalt = generateSalt();
-    sessionKey = await deriveAesKey(pin, pinSalt);
+    const pepper = generatePepper();
+    sessionKey = await deriveAesKey(pin, pinSalt, pepper);
     await setSalt(toBase64(pinSalt));
+    await setPepper(pepper);
     hideStartup();
     return;
   }
@@ -416,7 +467,8 @@ async function tryUnlockWithPin(pin) {
   const blob = await getSessionBlob();
   const saltValue = await getSalt();
   if (!blob || !saltValue) throw new Error("No session state available");
-  const key = await deriveAesKey(pin, fromBase64(saltValue));
+  const pepper = await getPepper();          // null for legacy sessions
+  const key = await deriveAesKey(pin, fromBase64(saltValue), pepper);
   const decrypted = await decryptJson(key, blob);
   sessionKey = key;
   pinSalt = fromBase64(saltValue);
@@ -435,7 +487,9 @@ async function wipePhi() {
   stopAutosave();
   await overwriteAndDelete(STORES.phi, "sessionBlob");
   await overwriteAndDelete(STORES.meta, "pinSalt");
+  await overwriteAndDelete(STORES.meta, "pinPepper");
   await deleteSalt();
+  await deletePepper();
 
   const keys = await caches.keys();
   for (const key of keys) {
@@ -453,6 +507,7 @@ async function wipePhi() {
 async function startNewClientFlow() {
   await wipePhi();
   await setNewPinFlow();
+  await checkForAppUpdate();
   await savePhiEncrypted();
   await startAutosave();
   showToast("Ready for new client.");
@@ -504,6 +559,7 @@ async function resumeOrStartFlow() {
               hideSecondary: true
             });
             await setNewPinFlow();
+            await checkForAppUpdate();
             return;
           }
           const attemptsRemaining = MAX_PIN_ATTEMPTS - startupFailedAttempts;
@@ -518,12 +574,14 @@ async function resumeOrStartFlow() {
           hideSecondary: true
         });
         await setNewPinFlow();
+        await checkForAppUpdate();
         return;
       }
     }
   }
 
   await setNewPinFlow();
+  await checkForAppUpdate();
 }
 
 async function lockSession() {
@@ -632,7 +690,10 @@ async function createPdfForActiveView() {
     Array.from(imgs).map((img) => img.decode().catch(() => {}))
   );
 
-  const formType = state.currentView === "roi" ? "ROI" : "Notice";
+  const roiNum = state.currentView === "roi"
+    ? state.roi.instances.findIndex((r) => r.id === state.roi.activeId) + 1
+    : 0;
+  const formType = roiNum ? `ROI ${roiNum}` : "Notice";
   const filename = buildFileName(formType, state.general);
 
   try {
@@ -848,7 +909,7 @@ function bindSignatures() {
     markChanged();
   });
 
-  function bindSigLock(btn, pad) {
+  function bindSigLock(btn, pad, onToggle) {
     btn.addEventListener("click", () => {
       if (pad.isLocked()) {
         pad.unlock();
@@ -857,11 +918,13 @@ function bindSignatures() {
         pad.lock();
         btn.textContent = "Unlock";
       }
+      onToggle(pad.isLocked());
+      markChanged();
     });
   }
-  bindSigLock(ui.lockRoiSigBtn, roiSigPad);
-  bindSigLock(ui.lockRoiParentSigBtn, roiParentSigPad);
-  bindSigLock(ui.lockNoticeSigBtn, noticeSigPad);
+  bindSigLock(ui.lockRoiSigBtn, roiSigPad, (v) => upsertActiveRoi(state, { sigLocked: v }));
+  bindSigLock(ui.lockRoiParentSigBtn, roiParentSigPad, (v) => upsertActiveRoi(state, { parentSigLocked: v }));
+  bindSigLock(ui.lockNoticeSigBtn, noticeSigPad, (v) => { state.notice.sigLocked = v; });
 }
 
 function bindLockFlow() {
@@ -1006,5 +1069,6 @@ bootstrap().catch(async () => {
   await wipePhi();
   showToast("Data could not be restored. Starting over.");
   await setNewPinFlow();
+  await checkForAppUpdate();
   renderState();
 });
