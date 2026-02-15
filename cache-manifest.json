@@ -1,15 +1,15 @@
 {
-  "appVersion": 11,
+  "appVersion": 13,
   "vendorVersion": 1,
   "app": {
     "files": {
-      "index.html": "c5abd636a133",
+      "index.html": "e3f20a319f17",
       "styles.css": "31d2052c89cd",
       "manifest.webmanifest": "a0e243095081",
       "assets/benchmark-logo.svg": "d56b1c14cdb2",
       "sw.js": "ab8ef0b1fbe1",
       "src/main.js": "a43ee96ee1fb",
-      "src/constants.js": "d45d0618edd0",
+      "src/constants.js": "1ae6285c82f2",
       "src/state.js": "fbca44091a0c",
       "src/db.js": "18cc30a4dfa3",
       "src/crypto.js": "0a22bd2e3313",
