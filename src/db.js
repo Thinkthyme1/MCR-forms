@@ -164,6 +164,28 @@ export async function deleteSalt() {
   return del(STORES.meta, "pinSalt");
 }
 
+/* ── Per-session pepper (device-key-encrypted) ───────────────────── */
+
+export async function setPepper(pepperBytes) {
+  const encrypted = await deviceEncrypt(Array.from(pepperBytes));
+  return set(STORES.meta, "pinPepper", encrypted);
+}
+
+export async function getPepper() {
+  const raw = await get(STORES.meta, "pinPepper");
+  if (!raw) return null;
+  try {
+    const arr = await deviceDecrypt(raw);
+    return new Uint8Array(arr);
+  } catch {
+    return null;
+  }
+}
+
+export async function deletePepper() {
+  return del(STORES.meta, "pinPepper");
+}
+
 export async function setAssetMirror(path, bytes) {
   return set(STORES.assets, path, bytes);
 }
