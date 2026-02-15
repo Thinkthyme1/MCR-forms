@@ -8,6 +8,9 @@ export const STORES = {
   assets: "assets"
 };
 
+const DEVICE_KEY_ID = "deviceKey";
+let cachedDeviceKey = null;
+
 let cachedDb = null;
 
 function openDb() {
@@ -80,12 +83,57 @@ export async function clearStore(store) {
   return tx(store, "readwrite", (s) => s.clear());
 }
 
+/* ── Device-bound encryption for staff data ──────────────────────── */
+
+async function getDeviceKey() {
+  if (cachedDeviceKey) return cachedDeviceKey;
+  const stored = await get(STORES.meta, DEVICE_KEY_ID);
+  if (stored) { cachedDeviceKey = stored; return stored; }
+  const key = await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    false,          // non-extractable
+    ["encrypt", "decrypt"]
+  );
+  await set(STORES.meta, DEVICE_KEY_ID, key);
+  cachedDeviceKey = key;
+  return key;
+}
+
+async function deviceEncrypt(obj) {
+  const key = await getDeviceKey();
+  const iv = new Uint8Array(12);
+  crypto.getRandomValues(iv);
+  const plaintext = new TextEncoder().encode(JSON.stringify(obj));
+  const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext);
+  return { _enc: true, iv: Array.from(iv), cipher: Array.from(new Uint8Array(cipher)) };
+}
+
+async function deviceDecrypt(blob) {
+  if (!blob || !blob._enc) return blob;   // unencrypted legacy data
+  const key = await getDeviceKey();
+  const iv = new Uint8Array(blob.iv);
+  const cipher = new Uint8Array(blob.cipher);
+  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+  return JSON.parse(new TextDecoder().decode(plaintext));
+}
+
+/* ── Staff info (encrypted at rest, persists across sessions) ──── */
+
+const EMPTY_STAFF = { firstName: "", lastName: "", role: "" };
+
 export async function getStaffInfo() {
-  return (await get(STORES.staff, "profile")) || { firstName: "", lastName: "", role: "" };
+  const raw = await get(STORES.staff, "profile");
+  if (!raw) return EMPTY_STAFF;
+  try {
+    return await deviceDecrypt(raw);
+  } catch {
+    return EMPTY_STAFF;
+  }
 }
 
 export async function setStaffInfo(staff) {
-  return set(STORES.staff, "profile", staff);
+  const encrypted = await deviceEncrypt(staff);
+  return set(STORES.staff, "profile", encrypted);
 }
 
 export async function getDefaultDirHandle() {
@@ -135,7 +183,9 @@ export async function overwriteAndDelete(store, key) {
   const existing = await get(store, key);
   if (existing == null) return;
 
-  const size = typeof existing === "string" ? Math.max(32, existing.length) : 2048;
+  const size = typeof existing === "string"
+    ? Math.max(32, existing.length)
+    : Math.max(2048, JSON.stringify(existing).length);
   await set(store, key, randomBytes(size));
   await del(store, key);
 }

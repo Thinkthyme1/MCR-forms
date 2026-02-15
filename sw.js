@@ -122,13 +122,15 @@ self.addEventListener("fetch", (event) => {
       const hit = await (await caches.open(name)).match(event.request);
       if (hit) return hit;
     }
-    // Fallback to network
+    // Fallback to network — only cache valid responses
     try {
       const response = await fetch(event.request);
-      const appName = await findCache(APP_PREFIX);
-      if (appName) {
-        const cache = await caches.open(appName);
-        cache.put(event.request, response.clone());
+      if (response.ok) {
+        const appName = await findCache(APP_PREFIX);
+        if (appName) {
+          const cache = await caches.open(appName);
+          cache.put(event.request, response.clone());
+        }
       }
       return response;
     } catch {

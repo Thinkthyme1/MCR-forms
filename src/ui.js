@@ -73,8 +73,13 @@ export function startupPrompt({
   const startupActions = $("startupActions");
 
   startupScreen.classList.remove("hidden");
-  startupMessage.innerHTML = `<strong>${title}</strong><br>${message}`;
-  startupActions.innerHTML = "";
+  startupMessage.textContent = "";
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  startupMessage.appendChild(strong);
+  startupMessage.appendChild(document.createElement("br"));
+  startupMessage.appendChild(document.createTextNode(message));
+  startupActions.textContent = "";
 
   const inputs = [];
   for (const field of fields) {

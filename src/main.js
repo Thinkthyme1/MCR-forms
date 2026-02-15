@@ -607,8 +607,9 @@ async function savePdfBlob(blobOrBytes, filename) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = filename;
+  const objectUrl = link.href;
   link.click();
-  URL.revokeObjectURL(link.href);
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
   showToast(`Downloaded ${filename}`);
 }
 
@@ -947,7 +948,17 @@ function blockIfEmbeddedFrame() {
     isEmbedded = true;
   }
   if (!isEmbedded) return;
-  document.body.innerHTML = `<main style="font-family: Segoe UI, Tahoma, sans-serif; padding: 2rem; color: #111827; background: #f3f4f6; min-height: 100vh;"><h1 style="margin-top: 0;">Blocked</h1><p>This app cannot run inside an embedded frame.</p></main>`;
+  document.body.textContent = "";
+  const m = document.createElement("main");
+  m.style.cssText = "font-family: Segoe UI, Tahoma, sans-serif; padding: 2rem; color: #111827; background: #f3f4f6; min-height: 100vh;";
+  const h = document.createElement("h1");
+  h.style.marginTop = "0";
+  h.textContent = "Blocked";
+  const p = document.createElement("p");
+  p.textContent = "This app cannot run inside an embedded frame.";
+  m.appendChild(h);
+  m.appendChild(p);
+  document.body.appendChild(m);
   throw new Error("Blocked embedded frame context");
 }
 
