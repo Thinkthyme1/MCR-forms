@@ -539,7 +539,7 @@ input, textarea, select {
 }
 
 /* ============================================================
-   PRINT-READY DIV STYLES (off-screen, rendered by html2pdf)
+   PRINT-READY DIV STYLES (off-screen until window.print())
    ============================================================ */
 .print-ready {
   position: absolute;
@@ -553,6 +553,10 @@ input, textarea, select {
   font-size: 9pt;
   line-height: 13pt;
   box-sizing: border-box;
+}
+.print-ready.printing {
+  position: static;
+  left: auto;
 }
 .pr-header {
   display: flex;
@@ -680,4 +684,26 @@ input, textarea, select {
 .pr-legal-text {
   font-size: 8pt;
   color: #333;
+}
+
+/* ============================================================
+   PRINT – hide everything except the active .print-ready div
+   ============================================================ */
+@media print {
+  /* Hide the entire app shell */
+  .app, .top-panel, .main-content, .toast, .modal-screen,
+  .lock-overlay, .warning { display: none !important; }
+
+  /* Show only the print-ready div that has the .printing class */
+  .print-ready.printing {
+    display: block !important;
+    position: static !important;
+    left: auto !important;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  @page { size: letter portrait; margin: 0.4in; }
+  body { margin: 0; background: #fff; }
 }

@@ -23,7 +23,6 @@ import {
 } from "./db.js";
 import { decryptJson, deriveAesKey, encryptJson, generateSalt, toBase64, fromBase64 } from "./crypto.js";
 import { attachSignaturePad } from "./signature-pad.js";
-import { buildFileName } from "./pdf.js";
 import { $, hideStartup, setHoldToConfirm, showToast, startupPrompt } from "./ui.js";
 import { clientFullName, createEmptyRoi, createInitialState, getActiveRoi, hasPhi, staffFullName, upsertActiveRoi } from "./state.js";
 
@@ -592,173 +591,22 @@ async function savePdfBlob(blobOrBytes, filename) {
   showToast(`Downloaded ${filename}`);
 }
 
-function openPrintPreview(element, title) {
-  /* Build a self-contained HTML document with all print-ready styles
-     embedded, then open it in a new browser tab.  This bypasses
-     html2canvas entirely — the browser's own rendering engine handles
-     layout, which is far more reliable and produces output that matches
-     the on-screen version exactly.
-     The new window includes a Print / Save-as-PDF button so the user
-     can generate the final PDF via the browser's native print dialog. */
-
-  /* Inline any <img src="assets/…"> as data-URIs so the new window
-     doesn't need access to the original server paths. */
-  const clone = element.cloneNode(true);
-  for (const img of clone.querySelectorAll("img")) {
-    const src = img.getAttribute("src") || "";
-    /* Skip images that are already data-URIs or blobs, and skip
-       images with no src (signature placeholders). */
-    if (!src || src.startsWith("data:") || src.startsWith("blob:")) continue;
-    /* For the logo SVG (or any local asset), read it from the page's
-       own loaded image to convert it to a data-URI via canvas. */
-    const orig = element.querySelector(`img[src="${CSS.escape(src)}"]`);
-    if (orig && orig.naturalWidth) {
-      try {
-        const cvs = document.createElement("canvas");
-        cvs.width = orig.naturalWidth;
-        cvs.height = orig.naturalHeight;
-        const ctx = cvs.getContext("2d");
-        ctx.drawImage(orig, 0, 0);
-        img.src = cvs.toDataURL("image/png");
-      } catch { /* CORS or tainted-canvas — leave src as-is */ }
-    }
-  }
-
-  const bodyHtml = clone.innerHTML;
-
-  /* Build the full HTML string.  We use a blob: URL (not about:blank
-     + document.write) so the new document does NOT inherit the parent
-     page's Content-Security-Policy — this allows the embedded <style>
-     and print-button script to work without weakening the main app's
-     CSP.  We also set a tight CSP on the preview page itself so it
-     cannot make network requests or load external resources. */
-  const html = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'unsafe-inline'"/>
-<title>${title.replace(/[<>&"]/g, "")}</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-
-.print-page {
-  width: 8.5in;
-  padding: 0.5in;
-  margin: 0 auto;
-  background: #fff;
-  color: #000;
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 9pt;
-  line-height: 13pt;
-}
-
-.toolbar {
-  position: sticky; top: 0; z-index: 10;
-  background: #1f2937; color: #fff;
-  padding: 0.5rem 1rem;
-  display: flex; align-items: center; gap: 1rem;
-  font-family: "Segoe UI", Tahoma, sans-serif;
-}
-.toolbar button {
-  background: #0f766e; color: #fff; border: none;
-  border-radius: 0.4rem; padding: 0.45rem 0.9rem;
-  font-size: 0.95rem; cursor: pointer;
-}
-.toolbar button:hover { background: #115e59; }
-.toolbar span { font-size: 0.85rem; opacity: 0.7; }
-
-@media print {
-  .toolbar { display: none; }
-  .print-page { padding: 0.4in; margin: 0; }
-  @page { size: letter portrait; margin: 0.25in; }
-}
-
-.pr-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 0.15in;
-}
-.pr-logo { height: 0.6in; width: auto; }
-.pr-client-info { text-align: right; }
-.pr-client-info p { margin: 0; }
-.pr-client-name { font-size: 11pt; font-weight: 700; }
-.pr-title {
-  text-align: center; font-size: 10pt; font-weight: 700;
-  margin: 0.1in 0; letter-spacing: 0.01em;
-}
-.pr-route-grid { display: flex; gap: 0; margin-bottom: 0.1in; }
-.pr-route-col {
-  flex: 1 1 50%; border: 1px solid #000;
-  padding: 0.08in 0.12in; font-size: 9pt;
-}
-.pr-route-col + .pr-route-col { border-left: none; }
-.pr-route-col p { margin: 1pt 0; }
-.pr-company { margin-top: 4pt !important; }
-.pr-initials-section { margin: 0.08in 0; }
-.pr-initial-row {
-  display: flex; align-items: flex-start; gap: 6pt; margin: 4pt 0;
-}
-.pr-initial-box {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 24pt; height: 18pt; border: 1px solid #000;
-  font-size: 9pt; font-weight: 700; flex-shrink: 0;
-}
-.pr-check { font-weight: 700; }
-.pr-label { font-size: 10pt; font-weight: 700; margin: 4pt 0 2pt; }
-.pr-field { margin: 3pt 0; }
-.pr-legal { margin: 0.08in 0; }
-.pr-legal p { margin: 4pt 0; }
-.pr-separator { border: none; border-top: 1px solid #000; margin: 0.1in 0; }
-.pr-sig-block { margin-bottom: 0.1in; }
-.pr-sig-row {
-  display: flex; align-items: center; border: 1px solid #000;
-  padding: 4pt; min-height: 54pt; gap: 10pt;
-}
-.pr-sig-img {
-  width: 150pt; height: 50pt; object-fit: contain; flex-shrink: 0;
-}
-.pr-sig-img:not([src]) { display: none; }
-.pr-sig-meta { flex: 1; }
-.pr-sig-meta p { margin: 2pt 0; font-size: 9pt; }
-.pr-notice-section { margin: 0.08in 0; }
-.pr-notice-section h3 { font-size: 10pt; margin: 6pt 0 2pt; }
-.pr-legal-text { font-size: 8pt; color: #333; }
-</style>
-</head>
-<body>
-<div class="toolbar">
-  <button id="printBtn">Print / Save as PDF</button>
-  <span>Use your browser's print dialog to save as PDF</span>
-</div>
-<div class="print-page">
-${bodyHtml}
-</div>
-<script>document.getElementById("printBtn").addEventListener("click",function(){window.print()});</script>
-</body>
-</html>`;
-
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const win = window.open(url, "_blank");
-  if (!win) {
-    URL.revokeObjectURL(url);
-    showToast("Pop-up blocked. Please allow pop-ups for this site.");
-    return;
-  }
-  /* Revoke after a generous delay so the window finishes loading. */
-  setTimeout(() => URL.revokeObjectURL(url), 120000);
-}
-
 function createPdfForActiveView() {
   renderPrintDivs();
-  if (state.currentView === "roi") {
-    openPrintPreview($("printRoi"), buildFileName("ROI", state.general));
-    return;
-  }
-  if (state.currentView === "notice") {
-    openPrintPreview($("printNotice"), buildFileName("Notice", state.general));
-  }
+
+  /* Determine which print-ready div to show. */
+  const printId = state.currentView === "roi" ? "printRoi"
+    : state.currentView === "notice" ? "printNotice"
+    : null;
+  if (!printId) return;
+
+  /* Bring it on-screen, fire the browser print dialog, then hide it
+     again.  The @media print rules in styles.css hide the app shell
+     and show only the .printing div. */
+  const el = $(printId);
+  el.classList.add("printing");
+  window.print();
+  el.classList.remove("printing");
 }
 
 function bindFieldInputs() {
