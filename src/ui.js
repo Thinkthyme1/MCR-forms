@@ -86,7 +86,10 @@ export function startupPrompt({
     const wrap = document.createElement("label");
     wrap.textContent = field.label;
     const input = document.createElement("input");
-    input.type = field.type || "text";
+    // Use type="text" even for PIN fields — type="password" triggers
+    // Chrome's "Save password?" prompt.  Visual masking via CSS class.
+    input.type = field.type === "password" ? "text" : (field.type || "text");
+    if (field.type === "password") input.classList.add("pin-mask");
     input.inputMode = field.inputMode || "text";
     input.maxLength = field.maxLength || 200;
     input.autocomplete = "off";

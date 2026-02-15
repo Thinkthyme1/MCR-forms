@@ -59,7 +59,7 @@
         </section>
 
         <section id="viewStaff" class="view hidden">
-          <h2>Staff Info</h2>
+          <h2>Staf Info</h2>
           <label>First Name <input id="staffFirstName" type="text" autocomplete="off" /></label>
           <label>Last Name <input id="staffLastName" type="text" autocomplete="off" /></label>
           <label>Title, Credentials <input id="staffRole" type="text" autocomplete="off" /></label>
@@ -261,7 +261,7 @@
         <button id="continueBtn" class="continue-btn" type="button">Continue</button>
         <div id="unlockPrompt" class="unlock-prompt hidden">
           <h2>Enter PIN to Continue</h2>
-          <input id="unlockPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" />
+          <input id="unlockPin" class="pin-mask" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" />
           <div class="actions">
             <button id="unlockSubmit" type="button">Unlock</button>
             <button id="unlockCancel" type="button">Cancel</button>

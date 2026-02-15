@@ -1063,6 +1063,7 @@ async function bootstrap() {
 }
 
 bootstrap().catch(async () => {
+  ui.appVersionLabel.textContent = `v${APP_VERSION}`;
   await wipePhi();
   showToast("Data could not be restored. Starting over.");
   await setNewPinFlow();

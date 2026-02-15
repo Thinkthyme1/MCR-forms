@@ -143,6 +143,7 @@ input, textarea, select {
   background: #fff;
   font-weight: 400;
 }
+.pin-mask { -webkit-text-security: disc; text-security: disc; }
 
 .form-card {
   background: var(--card);
