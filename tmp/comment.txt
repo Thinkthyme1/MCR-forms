@@ -1,0 +1,4 @@
+  /* Wait for the new SW to activate. This will wait as long as needed
+     for the service worker to finish installing and activating. The spinner
+     remains visible until activation completes. No timeout to avoid
+     reloading with the old SW still active. */
