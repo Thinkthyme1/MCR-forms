@@ -1,0 +1,65 @@
+// Fix for the update check race condition
+// 
+// PROBLEM: sw-reload.js reloads the page when controllerchange fires,
+// but this happens BEFORE checkForUpdateBeforePin sets the UPDATE_CHECK_KEY flag.
+// Result: infinite update loops or lost lock screen state.
+//
+// SOLUTION: Set the flag BEFORE calling reg.update(), so sw-reload.js
+// sees it when controllerchange fires.
+
+In src/main.js, function checkForUpdateBeforePin:
+
+BEFORE:
+  try {
+    await reg.update();
+  } catch {
+    spinner.remove();
+    return;
+  }
+
+  const pending = reg.installing || reg.waiting;
+  if (!pending) { spinner.remove(); return; }
+
+  /* Wait up to 5s for the new SW to activate... */
+  await new Promise((resolve) => {
+    ...
+  });
+
+  spinner.remove();
+
+  // Update is either applied or in-flight — reload either way.
+  // The sessionStorage flag prevents an infinite loop on the next load.
+  sessionStorage.setItem(UPDATE_CHECK_KEY, "1");
+  window.location.reload();
+
+AFTER:
+  // Set the flag BEFORE calling update(), so sw-reload.js sees it
+  // when controllerchange fires (which can happen during reg.update())
+  sessionStorage.setItem(UPDATE_CHECK_KEY, "1");
+  
+  try {
+    await reg.update();
+  } catch {
+    // Update failed - clear the flag and remove spinner
+    sessionStorage.removeItem(UPDATE_CHECK_KEY);
+    spinner.remove();
+    return;
+  }
+
+  const pending = reg.installing || reg.waiting;
+  if (!pending) { 
+    // No update available - clear the flag
+    sessionStorage.removeItem(UPDATE_CHECK_KEY);
+    spinner.remove(); 
+    return; 
+  }
+
+  /* Wait up to 5s for the new SW to activate... */
+  await new Promise((resolve) => {
+    ...
+  });
+
+  spinner.remove();
+
+  // The flag is already set - just reload
+  window.location.reload();

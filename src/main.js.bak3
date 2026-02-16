@@ -372,23 +372,16 @@ async function checkForUpdateBeforePin(containerEl) {
   const pending = reg.installing || reg.waiting;
   if (!pending) { spinner.remove(); return; }
 
-  /* Wait for the new SW to activate, but give up after 15 seconds.
-     If activation never completes (e.g. browser holds old SW, flaky
-     network, mobile Safari quirks), just show the PIN screen — the
-     update will finish in the background and apply next time. */
-  const activated = await new Promise((resolve) => {
-    if (pending.state === "activated") { resolve(true); return; }
-
-    const timeout = setTimeout(() => {
-      pending.removeEventListener("statechange", onStateChange);
-      resolve(false);                       // timed out
-    }, 15000);
-
+  /* Wait up to 5s for the new SW to activate.  With parallel fetches
+     in the install handler this is usually <2s.  If it times out we
+     reload anyway — sw-reload.js will catch controllerchange and do
+     a second reload once the install finishes in the background. */
+  await new Promise((resolve) => {
+    if (pending.state === "activated") { resolve(); return; }
     const onStateChange = () => {
       if (pending.state === "activated" || pending.state === "redundant") {
-        clearTimeout(timeout);
         pending.removeEventListener("statechange", onStateChange);
-        resolve(pending.state === "activated");
+        resolve();
       }
     };
     pending.addEventListener("statechange", onStateChange);
@@ -396,9 +389,7 @@ async function checkForUpdateBeforePin(containerEl) {
 
   spinner.remove();
 
-  if (!activated) return;   // timed out — show PIN with old version
-
-  // Update applied — reload so the new files are used.
+  // Update is either applied or in-flight — reload either way.
   // The sessionStorage flag prevents an infinite loop on the next load.
   sessionStorage.setItem(UPDATE_CHECK_KEY, "1");
   window.location.reload();
